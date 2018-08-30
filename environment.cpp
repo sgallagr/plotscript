@@ -181,6 +181,9 @@ then re-add the default ones.
 void Environment::reset(){
 
   envmap.clear();
+
+  // Built-In value of Euler's number
+  envmap.emplace("e", EnvResult(ExpressionType, Expression(EXP)));
   
   // Built-In value of pi
   envmap.emplace("pi", EnvResult(ExpressionType, Expression(PI)));
