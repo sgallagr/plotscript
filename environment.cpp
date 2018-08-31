@@ -111,7 +111,7 @@ Expression sqrt(const std::vector<Expression> & args) {
 	// preconditions
 	if (nargs_equal(args, 1)) {
 	  if (args[0].isHeadNumber()) {
-		result = sqrt(args[0].head().asNumber());
+		result = std::sqrt(args[0].head().asNumber());
 	  }
 	  else {
 		throw SemanticError("Error in call to square root: invalid argument.");
@@ -128,9 +128,10 @@ Expression pow(const std::vector<Expression> & args) {
 
 	double result = 0;
 
+	// preconditions
 	if (nargs_equal(args, 2)) {
 	  if ((args[0].isHeadNumber()) && (args[1].isHeadNumber())) {
-		result = pow(args[0].head().asNumber(), args[1].head().asNumber());
+		result = std::pow(args[0].head().asNumber(), args[1].head().asNumber());
 	  }
 	  else {
 		throw SemanticError("Error in call to power: invalid argument.");
@@ -138,6 +139,26 @@ Expression pow(const std::vector<Expression> & args) {
 	}
 	else {
 	  throw SemanticError("Error in call to power: invalid number of arguments.");
+	}
+
+	return Expression(result);
+};
+
+Expression ln(const std::vector<Expression> & args) {
+
+	double result = 0;
+
+	// preconditions
+	if (nargs_equal(args, 1)) {
+		if (args[0].isHeadNumber()) {
+			result = std::log(args[0].head().asNumber());
+		}
+		else {
+			throw SemanticError("Error in call to natural log: invalid argument.");
+		}
+	}
+	else {
+		throw SemanticError("Error in call to natural log: invalid number of arguments.");
 	}
 
 	return Expression(result);
@@ -244,4 +265,7 @@ void Environment::reset(){
 
   // Procedure: pow;
   envmap.emplace("pow", EnvResult(ProcedureType, pow));
+
+  // Procedure: ln;
+  envmap.emplace("ln", EnvResult(ProcedureType, ln));
 }
