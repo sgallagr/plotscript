@@ -104,6 +104,26 @@ Expression div(const std::vector<Expression> & args){
   return Expression(result);
 };
 
+Expression sqrt(const std::vector<Expression> & args) {
+
+	double result = 0;
+
+	// preconditions
+	if (nargs_equal(args, 1)) {
+	  if (args[0].isHeadNumber()) {
+		result = sqrt(args[0].head().asNumber());
+	  }
+	  else {
+		throw SemanticError("Error in call to square root: invalid argument.");
+	  }
+	}
+	else {
+	  throw SemanticError("Error in call to square root: invalid number of arguments.");
+	}
+
+	return Expression(result);
+};
+
 const double PI = std::atan2(0, -1);
 const double EXP = std::exp(1);
 
@@ -181,12 +201,12 @@ then re-add the default ones.
 void Environment::reset(){
 
   envmap.clear();
-
-  // Built-In value of Euler's number
-  envmap.emplace("e", EnvResult(ExpressionType, Expression(EXP)));
   
   // Built-In value of pi
   envmap.emplace("pi", EnvResult(ExpressionType, Expression(PI)));
+
+  // Built-In value of Euler's number
+  envmap.emplace("e", EnvResult(ExpressionType, Expression(EXP)));
 
   // Procedure: add;
   envmap.emplace("+", EnvResult(ProcedureType, add)); 
@@ -198,5 +218,8 @@ void Environment::reset(){
   envmap.emplace("*", EnvResult(ProcedureType, mul)); 
 
   // Procedure: div;
-  envmap.emplace("/", EnvResult(ProcedureType, div)); 
+  envmap.emplace("/", EnvResult(ProcedureType, div));
+
+  // Procedure: sqrt;
+  envmap.emplace("sqrt", EnvResult(ProcedureType, sqrt));
 }
