@@ -124,6 +124,25 @@ Expression sqrt(const std::vector<Expression> & args) {
 	return Expression(result);
 };
 
+Expression pow(const std::vector<Expression> & args) {
+
+	double result = 0;
+
+	if (nargs_equal(args, 2)) {
+	  if ((args[0].isHeadNumber()) && (args[1].isHeadNumber())) {
+		result = pow(args[0].head().asNumber(), args[1].head().asNumber());
+	  }
+	  else {
+		throw SemanticError("Error in call to power: invalid argument.");
+	  }
+	}
+	else {
+	  throw SemanticError("Error in call to power: invalid number of arguments.");
+	}
+
+	return Expression(result);
+};
+
 const double PI = std::atan2(0, -1);
 const double EXP = std::exp(1);
 
@@ -222,4 +241,7 @@ void Environment::reset(){
 
   // Procedure: sqrt;
   envmap.emplace("sqrt", EnvResult(ProcedureType, sqrt));
+
+  // Procedure: pow;
+  envmap.emplace("pow", EnvResult(ProcedureType, pow));
 }
