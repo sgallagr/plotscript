@@ -28,15 +28,23 @@ Expression default_proc(const std::vector<Expression> & args){
 
 Expression add(const std::vector<Expression> & args){
 
-  // check all aruments are numbers, while adding
   double result = 0;
-  for( auto & a :args){
-    if(a.isHeadNumber()){
-      result += a.head().asNumber();      
-    }
-    else{
-      throw SemanticError("Error in call to add, argument not a number");
-    }
+
+  // preconditions
+  if (args.size() >= 2) {
+
+    // check all aruments are numbers, while adding
+	for (auto & a : args) {
+	  if (a.isHeadNumber()) {
+		result += a.head().asNumber();
+	  }
+	  else {
+	    throw SemanticError("Error in call to add: argument not a number");
+	  }
+	}
+  }
+  else {
+	throw SemanticError("Error in call to add: invalid number of arguments.");
   }
 
   return Expression(result);
@@ -44,17 +52,24 @@ Expression add(const std::vector<Expression> & args){
 
 Expression mul(const std::vector<Expression> & args){
  
-  // check all aruments are numbers, while multiplying
   double result = 1;
-  for( auto & a :args){
-    if(a.isHeadNumber()){
-      result *= a.head().asNumber();      
-    }
-    else{
-      throw SemanticError("Error in call to mul, argument not a number");
+
+  // preconditions
+  if (args.size() >= 2) {
+
+    // check all aruments are numbers, while multiplying
+    for( auto & a :args){
+      if(a.isHeadNumber()){
+        result *= a.head().asNumber();      
+      }
+      else{
+        throw SemanticError("Error in call to mul: argument not a number");
+      }
     }
   }
-
+  else {
+	throw SemanticError("Error in call to mul: invalid number of arguments.");
+  }
   return Expression(result);
 };
 
