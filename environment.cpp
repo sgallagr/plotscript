@@ -324,7 +324,7 @@ void Environment::reset(){
   envmap.emplace("sqrt", EnvResult(ProcedureType, sqrt));
 
   // Procedure: pow;
-  envmap.emplace("pow", EnvResult(ProcedureType, pow));
+  envmap.emplace("^", EnvResult(ProcedureType, pow));
 
   // Procedure: ln;
   envmap.emplace("ln", EnvResult(ProcedureType, ln));
