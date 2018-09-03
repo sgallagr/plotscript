@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <complex>
 
 #include "environment.hpp"
 #include "semantic_error.hpp"
@@ -241,6 +242,7 @@ Expression tan(const std::vector<Expression> & args) {
 
 const double PI = std::atan2(0, -1);
 const double EXP = std::exp(1);
+const std::complex<double> I(0,1);
 
 Environment::Environment(){
 
@@ -322,6 +324,9 @@ void Environment::reset(){
 
   // Built-In value of Euler's number
   envmap.emplace("e", EnvResult(ExpressionType, Expression(EXP)));
+
+  // Built-In value of I
+  envmap.emplace("I", EnvResult(ExpressionType, Expression(I)));
 
   // Procedure: add;
   envmap.emplace("+", EnvResult(ProcedureType, add)); 

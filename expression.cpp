@@ -51,8 +51,7 @@ bool Expression::isHeadNumber() const noexcept{
 
 bool Expression::isHeadSymbol() const noexcept{
   return m_head.isSymbol();
-}  
-
+}
 
 void Expression::append(const Atom & a){
   m_tail.emplace_back(a);
@@ -193,14 +192,20 @@ Expression Expression::eval(Environment & env){
 
 std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
-  out << "(";
+  bool imaginary = false;
+
+  // formatting to prevent double parenthesis with imaginary results
+  if (exp.head().isImaginary()) imaginary = true;
+
+  if(!imaginary) out << "(";
+
   out << exp.head();
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;
   }
 
-  out << ")";
+  if(!imaginary) out << ")";
 
   return out;
 }

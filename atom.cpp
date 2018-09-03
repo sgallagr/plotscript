@@ -36,12 +36,20 @@ Atom::Atom(const std::string & value): Atom() {
   setSymbol(value);
 }
 
+Atom::Atom(std::complex<double> value): Atom() {
+
+  setImaginary(value);
+}
+
 Atom::Atom(const Atom & x): Atom(){
   if(x.isNumber()){
     setNumber(x.numberValue);
   }
   else if(x.isSymbol()){
     setSymbol(x.stringValue);
+  }
+  else if (x.isImaginary()) {
+	setImaginary(x.imaginaryValue);
   }
 }
 
@@ -57,6 +65,9 @@ Atom & Atom::operator=(const Atom & x){
     else if(x.m_type == SymbolKind){
       setSymbol(x.stringValue);
     }
+	else if (x.m_type == ImaginaryKind) {
+	  setImaginary(x.imaginaryValue);
+	}
   }
   return *this;
 }
@@ -81,6 +92,9 @@ bool Atom::isSymbol() const noexcept{
   return m_type == SymbolKind;
 }  
 
+bool Atom::isImaginary() const noexcept {
+  return m_type == ImaginaryKind;
+}
 
 void Atom::setNumber(double value){
 
@@ -101,6 +115,12 @@ void Atom::setSymbol(const std::string & value){
   new (&stringValue) std::string(value);
 }
 
+void Atom::setImaginary(std::complex<double> value) {
+
+	m_type = ImaginaryKind;
+	imaginaryValue = value;
+}
+
 double Atom::asNumber() const noexcept{
 
   return (m_type == NumberKind) ? numberValue : 0.0;  
@@ -113,6 +133,17 @@ std::string Atom::asSymbol() const noexcept{
 
   if(m_type == SymbolKind){
     result = stringValue;
+  }
+
+  return result;
+}
+
+std::complex<double> Atom::asImaginary() const noexcept{
+
+  std::complex<double> result;
+
+  if (m_type == ImaginaryKind) {
+	result = imaginaryValue;
   }
 
   return result;
@@ -143,6 +174,13 @@ bool Atom::operator==(const Atom & right) const noexcept{
       return stringValue == right.stringValue;
     }
     break;
+  case ImaginaryKind:
+  {
+	if(right.m_type != ImaginaryKind) return false;
+
+	return imaginaryValue == right.imaginaryValue;
+  }
+  break;
   default:
     return false;
   }
@@ -163,6 +201,9 @@ std::ostream & operator<<(std::ostream & out, const Atom & a){
   }
   if(a.isSymbol()){
     out << a.asSymbol();
+  }
+  if (a.isImaginary()) {
+	out << a.asImaginary();
   }
   return out;
 }
