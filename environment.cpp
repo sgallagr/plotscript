@@ -30,6 +30,10 @@ Expression default_proc(const std::vector<Expression> & args){
 Expression add(const std::vector<Expression> & args){
 
   double result = 0;
+  std::complex<double> result_c(0,0);
+
+  // keep track if there is any argument that is complex
+  bool complex = false;
 
   // preconditions
   if (args.size() >= 2) {
@@ -37,10 +41,18 @@ Expression add(const std::vector<Expression> & args){
     // check all aruments are numbers, while adding
 	for (auto & a : args) {
 	  if (a.isHeadNumber()) {
-		result += a.head().asNumber();
+		if (!complex) result += a.head().asNumber();
+		else result_c += a.head().asNumber();
+	  }
+	  else if (a.isHeadComplex()) {
+		if (!complex){
+		  complex = true;
+		  result_c.real(result);
+		}
+		else result_c += a.head().asComplex();
 	  }
 	  else {
-	    throw SemanticError("Error in call to add: argument not a number");
+	    throw SemanticError("Error in call to add: argument not a number or complex number");
 	  }
 	}
   }
@@ -48,7 +60,8 @@ Expression add(const std::vector<Expression> & args){
 	throw SemanticError("Error in call to add: invalid number of arguments.");
   }
 
-  return Expression(result);
+  if (!complex) return Expression(result);
+  else return Expression(result_c);
 };
 
 Expression mul(const std::vector<Expression> & args){

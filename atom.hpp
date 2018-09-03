@@ -50,7 +50,7 @@ public:
   bool isSymbol() const noexcept;
 
   /// predicate to determine if an Atom is of type Imaginary
-  bool isImaginary() const noexcept;
+  bool isComplex() const noexcept;
 
   /// value of Atom as a number, return 0 if not a Number
   double asNumber() const noexcept;
@@ -59,7 +59,7 @@ public:
   std::string asSymbol() const noexcept;
 
   /// value of Atom as an imaginary, returns (0, 0) if not an Imaginary
-  std::complex<double> asImaginary() const noexcept;
+  std::complex<double> asComplex() const noexcept;
 
   /// equality comparison based on type and value
   bool operator==(const Atom & right) const noexcept;
@@ -67,7 +67,7 @@ public:
 private:
 
   // internal enum of known types
-  enum Type {NoneKind, NumberKind, SymbolKind, ImaginaryKind};
+  enum Type {NoneKind, NumberKind, SymbolKind, ComplexKind};
 
   // track the type
   Type m_type;
@@ -77,7 +77,7 @@ private:
   union {
     double numberValue;
     std::string stringValue;
-	std::complex<double> imaginaryValue;
+	std::complex<double> complexValue;
   };
 
   // helper to set type and value of Number
@@ -87,7 +87,7 @@ private:
   void setSymbol(const std::string & value);
 
   // helper to set type and value of Imaginary
-  void setImaginary(std::complex<double> value);
+  void setComplex(std::complex<double> value);
 };
 
 /// inequality comparison for Atom

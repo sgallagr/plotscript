@@ -53,6 +53,10 @@ bool Expression::isHeadSymbol() const noexcept{
   return m_head.isSymbol();
 }
 
+bool Expression::isHeadComplex() const noexcept {
+  return m_head.isComplex();
+}
+
 void Expression::append(const Atom & a){
   m_tail.emplace_back(a);
 }
@@ -194,8 +198,8 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   bool imaginary = false;
 
-  // formatting to prevent double parenthesis with imaginary results
-  if (exp.head().isImaginary()) imaginary = true;
+  // formatting to prevent double parentheses with complex results
+  if (exp.head().isComplex()) imaginary = true;
 
   if(!imaginary) out << "(";
 

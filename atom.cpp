@@ -38,7 +38,7 @@ Atom::Atom(const std::string & value): Atom() {
 
 Atom::Atom(std::complex<double> value): Atom() {
 
-  setImaginary(value);
+  setComplex(value);
 }
 
 Atom::Atom(const Atom & x): Atom(){
@@ -48,8 +48,8 @@ Atom::Atom(const Atom & x): Atom(){
   else if(x.isSymbol()){
     setSymbol(x.stringValue);
   }
-  else if (x.isImaginary()) {
-	setImaginary(x.imaginaryValue);
+  else if (x.isComplex()) {
+	setComplex(x.complexValue);
   }
 }
 
@@ -65,8 +65,8 @@ Atom & Atom::operator=(const Atom & x){
     else if(x.m_type == SymbolKind){
       setSymbol(x.stringValue);
     }
-	else if (x.m_type == ImaginaryKind) {
-	  setImaginary(x.imaginaryValue);
+	else if (x.m_type == ComplexKind) {
+	  setComplex(x.complexValue);
 	}
   }
   return *this;
@@ -92,8 +92,8 @@ bool Atom::isSymbol() const noexcept{
   return m_type == SymbolKind;
 }  
 
-bool Atom::isImaginary() const noexcept {
-  return m_type == ImaginaryKind;
+bool Atom::isComplex() const noexcept {
+  return m_type == ComplexKind;
 }
 
 void Atom::setNumber(double value){
@@ -115,10 +115,10 @@ void Atom::setSymbol(const std::string & value){
   new (&stringValue) std::string(value);
 }
 
-void Atom::setImaginary(std::complex<double> value) {
+void Atom::setComplex(std::complex<double> value) {
 
-	m_type = ImaginaryKind;
-	imaginaryValue = value;
+	m_type = ComplexKind;
+	complexValue = value;
 }
 
 double Atom::asNumber() const noexcept{
@@ -138,12 +138,12 @@ std::string Atom::asSymbol() const noexcept{
   return result;
 }
 
-std::complex<double> Atom::asImaginary() const noexcept{
+std::complex<double> Atom::asComplex() const noexcept{
 
   std::complex<double> result;
 
-  if (m_type == ImaginaryKind) {
-	result = imaginaryValue;
+  if (m_type == ComplexKind) {
+	result = complexValue;
   }
 
   return result;
@@ -174,11 +174,11 @@ bool Atom::operator==(const Atom & right) const noexcept{
       return stringValue == right.stringValue;
     }
     break;
-  case ImaginaryKind:
+  case ComplexKind:
   {
-	if(right.m_type != ImaginaryKind) return false;
+	if(right.m_type != ComplexKind) return false;
 
-	return imaginaryValue == right.imaginaryValue;
+	return complexValue == right.complexValue;
   }
   break;
   default:
@@ -202,8 +202,8 @@ std::ostream & operator<<(std::ostream & out, const Atom & a){
   if(a.isSymbol()){
     out << a.asSymbol();
   }
-  if (a.isImaginary()) {
-	out << a.asImaginary();
+  if (a.isComplex()) {
+	out << a.asComplex();
   }
   return out;
 }
