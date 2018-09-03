@@ -33,7 +33,7 @@ Expression add(const std::vector<Expression> & args){
   std::complex<double> result_c(0,0);
 
   // keep track if there is any argument that is complex
-  bool complex = false;
+  bool complex;
 
   // preconditions
   if (args.size() >= 2) {
@@ -41,15 +41,12 @@ Expression add(const std::vector<Expression> & args){
     // check all aruments are numbers, while adding
 	for (auto & a : args) {
 	  if (a.isHeadNumber()) {
-		if (!complex) result += a.head().asNumber();
-		else result_c += a.head().asNumber();
+		result += a.head().asNumber();
+		result_c.real(result);
 	  }
 	  else if (a.isHeadComplex()) {
-		if (!complex){
-		  complex = true;
-		  result_c.real(result);
-		}
-		else result_c += a.head().asComplex();
+		if (!complex) complex = true;
+		result_c += a.head().asComplex();
 	  }
 	  else {
 	    throw SemanticError("Error in call to add: argument not a number or complex number");

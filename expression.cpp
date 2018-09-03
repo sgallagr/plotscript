@@ -196,12 +196,12 @@ Expression Expression::eval(Environment & env){
 
 std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
-  bool imaginary = false;
+  bool complex = false;
 
   // formatting to prevent double parentheses with complex results
-  if (exp.head().isComplex()) imaginary = true;
+  if (exp.head().isComplex()) complex = true;
 
-  if(!imaginary) out << "(";
+  if(!complex) out << "(";
 
   out << exp.head();
 
@@ -209,7 +209,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
     out << *e;
   }
 
-  if(!imaginary) out << ")";
+  if(!complex) out << ")";
 
   return out;
 }
