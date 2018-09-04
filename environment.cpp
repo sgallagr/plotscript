@@ -65,7 +65,9 @@ Expression add(const std::vector<Expression> & args){
 Expression mul(const std::vector<Expression> & args){
  
   double result = 1;
-  std::complex<double> result_c(1,1);
+  double result_foil [4] = {1};
+
+  std::complex<double> result_c(0,0);
 
   // keep track if there is any argument that is complex
   bool complex = false;
@@ -76,13 +78,21 @@ Expression mul(const std::vector<Expression> & args){
     // check all aruments are numbers, while multiplying
     for(auto & a : args){
       if(a.isHeadNumber()){
-        result *= a.head().asNumber();
-		result_c.real(result);
+        result_c.real(result *= a.head().asNumber());
+		result_c.imag(std::imag(result_c) * a.head().asNumber());
       }
 	  else if (a.isHeadComplex()){
 		if (!complex) complex = true;
-		result_c *= a.head().asComplex();
-		result = std::real(result_c);
+
+		result_foil[0] = result * std::real(a.head().asComplex());
+		result_foil[1] = result * std::imag(a.head().asComplex());
+		result_foil[2] = std::imag(result_c) * std::real(a.head().asComplex());
+		result_foil[3] = std::imag(result_c) * std::imag(a.head().asComplex());
+
+		result_c.real(result_foil[0]);
+		result_c.imag(result_foil[1] + result_foil[2] + result_foil[3]);
+
+		result = result_foil[0];
 	  }
       else{
         throw SemanticError("Error in call to mul: argument not a number or complex number");
