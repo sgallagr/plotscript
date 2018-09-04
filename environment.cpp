@@ -65,29 +65,49 @@ Expression add(const std::vector<Expression> & args){
 Expression mul(const std::vector<Expression> & args){
  
   double result = 1;
+  std::complex<double> result_c(0,0);
+
+  // keep track if there is any argument that is complex
+  bool complex = false;
 
   // preconditions
   if (args.size() >= 2) {
 
     // check all aruments are numbers, while multiplying
-    for( auto & a :args){
+    for(auto & a : args){
       if(a.isHeadNumber()){
-        result *= a.head().asNumber();      
+		if (complex) result_c.real(1);
+        result *= a.head().asNumber();
+		result_c.real(result);
       }
+	  else if (a.isHeadComplex()){
+		if (!complex){
+	      complex = true;
+		  if (std::real(a.head().asComplex()) != 0) result_c.real(1);
+		  result_c.imag(1);
+		}
+		result_c *= a.head().asComplex();
+		result = std::real(result_c);
+	  }
       else{
-        throw SemanticError("Error in call to mul: argument not a number");
+        throw SemanticError("Error in call to mul: argument not a number or complex number");
       }
     }
   }
   else {
 	throw SemanticError("Error in call to mul: invalid number of arguments.");
   }
-  return Expression(result);
+
+  if (!complex) return Expression(result);
+  return Expression(result_c);
 };
 
 Expression subneg(const std::vector<Expression> & args){
 
   double result = 0;
+  std::complex<double> result_c(0,0);
+
+  bool complex = false;
 
   // preconditions
   if(nargs_equal(args,1)){
@@ -102,6 +122,18 @@ Expression subneg(const std::vector<Expression> & args){
     if( (args[0].isHeadNumber()) && (args[1].isHeadNumber()) ){
       result = args[0].head().asNumber() - args[1].head().asNumber();
     }
+	else if( (args[0].isHeadNumber()) && (args[1].isHeadComplex()) ){
+      result_c = args[0].head().asNumber() - args[1].head().asComplex();
+	  complex = true;
+    }
+	else if( (args[0].isHeadComplex()) && (args[1].isHeadNumber()) ){
+      result_c = args[0].head().asComplex() - args[1].head().asNumber();
+	  complex = true;
+    }
+	else if( (args[0].isHeadComplex()) && (args[1].isHeadComplex()) ){
+      result_c = args[0].head().asComplex() - args[1].head().asComplex();
+	  complex = true;
+    }
     else{      
       throw SemanticError("Error in call to subtraction: invalid argument.");
     }
@@ -110,7 +142,8 @@ Expression subneg(const std::vector<Expression> & args){
     throw SemanticError("Error in call to subtraction or negation: invalid number of arguments.");
   }
 
-  return Expression(result);
+  if (!complex) return Expression(result);
+  else return Expression(result_c);
 };
 
 Expression div(const std::vector<Expression> & args){
