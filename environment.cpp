@@ -188,11 +188,22 @@ Expression div(const std::vector<Expression> & args){
 Expression sqrt(const std::vector<Expression> & args){
 
   double result = 0;
+  std::complex<double> result_c(0,1);
+
+  bool complex = false;
 
   // preconditions
   if (nargs_equal(args, 1)) {
 	if (args[0].isHeadNumber()) {
+	  if (args[0].head().asNumber() < 0) {
+		complex = true;
+		result_c *= -args[0].head().asNumber();
+	  }
 	  result = std::sqrt(args[0].head().asNumber());
+	}
+	else if (args[0].isHeadComplex()) {
+	  complex = true;
+	  result_c = std::sqrt(args[0].head().asComplex());
 	}
 	else {
 	  throw SemanticError("Error in call to square root: invalid argument.");
@@ -202,17 +213,33 @@ Expression sqrt(const std::vector<Expression> & args){
 	throw SemanticError("Error in call to square root: invalid number of arguments.");
   }
 
-  return Expression(result);
+  if (!complex) return Expression(result);
+  else return Expression(result_c);
 };
 
 Expression pow(const std::vector<Expression> & args){
 
   double result = 0;
+  std::complex<double> result_c(0,0);
+
+  bool complex = false;
 
   // preconditions
   if (nargs_equal(args, 2)) {
 	if ((args[0].isHeadNumber()) && (args[1].isHeadNumber())) {
 	  result = std::pow(args[0].head().asNumber(), args[1].head().asNumber());
+	}
+	else if ((args[0].isHeadNumber()) && (args[1].isHeadComplex())) {
+	  result_c = std::pow(args[0].head().asNumber(), args[1].head().asComplex());
+	  complex = true;
+	}
+	else if ((args[0].isHeadComplex()) && (args[1].isHeadNumber())) {
+	  result_c = std::pow(args[0].head().asComplex(), args[1].head().asNumber());
+	  complex = true;
+	}
+	else if ((args[0].isHeadComplex()) && (args[1].isHeadComplex())) {
+	  result_c = std::pow(args[0].head().asComplex(), args[1].head().asComplex());
+	  complex = true;
 	}
 	else {
 	  throw SemanticError("Error in call to power: invalid argument.");
@@ -222,7 +249,8 @@ Expression pow(const std::vector<Expression> & args){
 	throw SemanticError("Error in call to power: invalid number of arguments.");
   }
 
-  return Expression(result);
+  if (!complex) return Expression(result);
+  else return Expression(result_c);
 };
 
 Expression ln(const std::vector<Expression> & args){
