@@ -173,7 +173,7 @@ Expression div(const std::vector<Expression> & args){
   return Expression(result);
 };
 
-Expression sqrt(const std::vector<Expression> & args) {
+Expression sqrt(const std::vector<Expression> & args){
 
   double result = 0;
 
@@ -193,7 +193,7 @@ Expression sqrt(const std::vector<Expression> & args) {
   return Expression(result);
 };
 
-Expression pow(const std::vector<Expression> & args) {
+Expression pow(const std::vector<Expression> & args){
 
   double result = 0;
 
@@ -213,7 +213,7 @@ Expression pow(const std::vector<Expression> & args) {
   return Expression(result);
 };
 
-Expression ln(const std::vector<Expression> & args) {
+Expression ln(const std::vector<Expression> & args){
 
   double result = 0;
 
@@ -233,7 +233,7 @@ Expression ln(const std::vector<Expression> & args) {
   return Expression(result);
 };
 
-Expression sin(const std::vector<Expression> & args) {
+Expression sin(const std::vector<Expression> & args){
 
   double result = 0;
 
@@ -253,7 +253,7 @@ Expression sin(const std::vector<Expression> & args) {
   return Expression(result);
 };
 
-Expression cos(const std::vector<Expression> & args) {
+Expression cos(const std::vector<Expression> & args){
 
   double result = 0;
 
@@ -273,7 +273,7 @@ Expression cos(const std::vector<Expression> & args) {
   return Expression(result);
 };
 
-Expression tan(const std::vector<Expression> & args) {
+Expression tan(const std::vector<Expression> & args){
 
   double result = 0;
 
@@ -288,6 +288,106 @@ Expression tan(const std::vector<Expression> & args) {
   }
   else {
 	throw SemanticError("Error in call to tangent: invalid number of arguments.");
+  }
+
+  return Expression(result);
+};
+
+Expression real(const std::vector<Expression> & args){
+  
+  double result = 0;
+
+  // preconditions
+  if (nargs_equal(args, 1)) {
+	if (args[0].isHeadComplex()) {
+	  result = std::real(args[0].head().asComplex());
+	}
+	else {
+	  throw SemanticError("Error in call to retrieve real: invalid argument.");
+	}
+  }
+  else {
+	throw SemanticError("Error in call to retrieve real: invalid number of arguments.");
+  }
+
+  return Expression(result);
+};
+
+Expression imag(const std::vector<Expression> & args){
+  
+  double result = 0;
+
+  // preconditions
+  if (nargs_equal(args, 1)) {
+	if (args[0].isHeadComplex()) {
+	  result = std::imag(args[0].head().asComplex());
+	}
+	else {
+	  throw SemanticError("Error in call to retrieve imaginary: invalid argument.");
+	}
+  }
+  else {
+	throw SemanticError("Error in call to retrieve imaginary: invalid number of arguments.");
+  }
+
+  return Expression(result);
+};
+
+Expression mag(const std::vector<Expression> & args){
+  
+  double result = 0;
+
+  // preconditions
+  if (nargs_equal(args, 1)) {
+	if (args[0].isHeadComplex()) {
+	  result = std::abs(args[0].head().asComplex());
+	}
+	else {
+	  throw SemanticError("Error in call to retrieve magnitude: invalid argument.");
+	}
+  }
+  else {
+	throw SemanticError("Error in call to retrieve magnitude: invalid number of arguments.");
+  }
+
+  return Expression(result);
+};
+
+Expression arg(const std::vector<Expression> & args){
+  
+  double result = 0;
+
+  // preconditions
+  if (nargs_equal(args, 1)) {
+	if (args[0].isHeadComplex()) {
+	  result = std::arg(args[0].head().asComplex());
+	}
+	else {
+	  throw SemanticError("Error in call to retrieve argument: invalid argument.");
+	}
+  }
+  else {
+	throw SemanticError("Error in call to retrieve argument: invalid number of arguments.");
+  }
+
+  return Expression(result);
+};
+
+Expression conj(const std::vector<Expression> & args){
+  
+  std::complex<double> result(0,0);
+
+  // preconditions
+  if (nargs_equal(args, 1)) {
+	if (args[0].isHeadComplex()) {
+	  result = std::conj(args[0].head().asComplex());
+	}
+	else {
+	  throw SemanticError("Error in call to retrieve conjugate: invalid argument.");
+	}
+  }
+  else {
+	throw SemanticError("Error in call to retrieve conjugate: invalid number of arguments.");
   }
 
   return Expression(result);
@@ -410,4 +510,19 @@ void Environment::reset(){
 
   // Procedure: tan;
   envmap.emplace("tan", EnvResult(ProcedureType, tan));
+
+  // Procedure: real;
+  envmap.emplace("real", EnvResult(ProcedureType, real));
+
+  // Procedure: imag;
+  envmap.emplace("imag", EnvResult(ProcedureType, imag));
+
+  // Procedure: mag;
+  envmap.emplace("mag", EnvResult(ProcedureType, mag));
+
+  // Procedure: arg;
+  envmap.emplace("arg", EnvResult(ProcedureType, arg));
+
+  // Procedure: conj;
+  envmap.emplace("conj", EnvResult(ProcedureType, conj));
 }
