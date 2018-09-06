@@ -42,12 +42,10 @@ Expression add(const std::vector<Expression> & args){
 	for (auto & a : args) {
 	  if (a.isHeadNumber()) {
 		result += a.head().asNumber();
-		result_c.real(result);
 	  }
 	  else if (a.isHeadComplex()) {
 		if (!complex) complex = true;
 		result_c += a.head().asComplex();
-		result = std::real(result_c);
 	  }
 	  else {
 	    throw SemanticError("Error in call to add: argument not a number or complex number");
@@ -59,17 +57,20 @@ Expression add(const std::vector<Expression> & args){
   }
 
   if (!complex) return Expression(result);
-  else return Expression(result_c);
+  else{
+    result_c.real(std::real(result_c) + result);
+	return Expression(result_c);
+  }
 };
 
 Expression mul(const std::vector<Expression> & args){
  
   double result = 1;
-
-  std::complex<double> result_c;
+  std::complex<double> result_c(0,0);
 
   // keep track if there is any argument that is complex
   bool complex = false;
+
   // preconditions
   if (args.size() >= 2) {
 
@@ -81,7 +82,7 @@ Expression mul(const std::vector<Expression> & args){
 	  else if (a.isHeadComplex()){
 		if (!complex)  {
 		  complex = true;
-		  result_c = (a.head().asNumber(),a.head().asComplex());
+		  result_c = a.head().asComplex();
 		}
 		else result_c *= a.head().asComplex();
 	  }
@@ -107,6 +108,7 @@ Expression subneg(const std::vector<Expression> & args){
   double result = 0;
   std::complex<double> result_c(0,0);
 
+  // keep track if there is any argument that is complex
   bool complex = false;
 
   // preconditions
@@ -122,6 +124,8 @@ Expression subneg(const std::vector<Expression> & args){
       throw SemanticError("Error in call to negate: invalid argument.");
     }
   }
+
+  // preconditions
   else if(nargs_equal(args,2)){
     if( (args[0].isHeadNumber()) && (args[1].isHeadNumber()) ){
       result = args[0].head().asNumber() - args[1].head().asNumber();
@@ -155,8 +159,10 @@ Expression div(const std::vector<Expression> & args){
   double result = 0; 
   std::complex<double> result_c = 0;
 
+  // keep track if there is any argument that is complex
   bool complex = false;
 
+  // preconditions
   if(nargs_equal(args,2)){
     if( (args[0].isHeadNumber()) && (args[1].isHeadNumber()) ){
       result = args[0].head().asNumber() / args[1].head().asNumber();
@@ -190,6 +196,7 @@ Expression sqrt(const std::vector<Expression> & args){
   double result = 0;
   std::complex<double> result_c(0,1);
 
+  // keep track if the argument is complex
   bool complex = false;
 
   // preconditions
@@ -222,6 +229,7 @@ Expression pow(const std::vector<Expression> & args){
   double result = 0;
   std::complex<double> result_c(0,0);
 
+  // keep track if there is any argument that is complex
   bool complex = false;
 
   // preconditions

@@ -31,12 +31,12 @@ Atom::Atom(const Token & token): Atom(){
   }
 }
 
-Atom::Atom(const std::string & value): Atom() {
+Atom::Atom(const std::string & value): Atom(){
   
   setSymbol(value);
 }
 
-Atom::Atom(std::complex<double> value): Atom() {
+Atom::Atom(std::complex<double> value): Atom(){
 
   setComplex(value);
 }
@@ -65,7 +65,7 @@ Atom & Atom::operator=(const Atom & x){
     else if(x.m_type == SymbolKind){
       setSymbol(x.stringValue);
     }
-	else if (x.m_type == ComplexKind) {
+	else if (x.m_type == ComplexKind){
 	  setComplex(x.complexValue);
 	}
   }
@@ -115,7 +115,7 @@ void Atom::setSymbol(const std::string & value){
   new (&stringValue) std::string(value);
 }
 
-void Atom::setComplex(std::complex<double> value) {
+void Atom::setComplex(std::complex<double> value){
 
 	m_type = ComplexKind;
 	complexValue = value;

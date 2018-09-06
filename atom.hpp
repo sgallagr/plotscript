@@ -25,7 +25,7 @@ public:
   /// Construct an Atom of type Symbol named value
   Atom(const std::string & value);
 
-  /// Construct an Atom of type Imaginary with value
+  /// Construct an Atom of type Complex with value
   Atom(std::complex<double> value);
 
   /// Construct an Atom directly from a Token
@@ -49,7 +49,7 @@ public:
   /// predicate to determine if an Atom is of type Symbol
   bool isSymbol() const noexcept;
 
-  /// predicate to determine if an Atom is of type Imaginary
+  /// predicate to determine if an Atom is of type Complex
   bool isComplex() const noexcept;
 
   /// value of Atom as a number, return 0 if not a Number
@@ -58,7 +58,7 @@ public:
   /// value of Atom as a number, returns empty-string if not a Symbol
   std::string asSymbol() const noexcept;
 
-  /// value of Atom as an imaginary, returns (0, 0) if not an Imaginary
+  /// value of Atom as complex, returns (0, 0) if not Complex
   std::complex<double> asComplex() const noexcept;
 
   /// equality comparison based on type and value
@@ -86,7 +86,7 @@ private:
   // helper to set type and value of Symbol
   void setSymbol(const std::string & value);
 
-  // helper to set type and value of Imaginary
+  // helper to set type and value of Complex
   void setComplex(std::complex<double> value);
 };
 

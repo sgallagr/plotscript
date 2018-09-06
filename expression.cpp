@@ -196,9 +196,8 @@ Expression Expression::eval(Environment & env){
 
 std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
+  // prevent double parentheses with complex results
   bool complex = false;
-
-  // formatting to prevent double parentheses with complex results
   if (exp.head().isComplex()) complex = true;
 
   if(!complex) out << "(";
