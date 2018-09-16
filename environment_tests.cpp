@@ -89,6 +89,20 @@ TEST_CASE( "Test get built-in procedure", "[environment]" ) {
   args.emplace_back(a);
   args.emplace_back(b);
   REQUIRE(padd(args) == Expression(c));
+
+  INFO("trying add procedure with one argument")
+  args.clear();
+  args.emplace_back(1.0);
+  REQUIRE_THROWS_AS(padd(args), SemanticError);
+
+  INFO("trying complex mul procedure")
+  args.clear();
+  padd = env.get_proc(Atom("*"));
+  c.real(-2);
+  c.imag(0);
+  args.emplace_back(a);
+  args.emplace_back(b);
+  REQUIRE(padd(args) == Expression(c));
 }
 
 TEST_CASE( "Test reset", "[environment]" ) {
