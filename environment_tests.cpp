@@ -12,6 +12,12 @@ TEST_CASE( "Test default constructor", "[environment]" ) {
   REQUIRE(env.is_known(Atom("pi")));
   REQUIRE(env.is_exp(Atom("pi")));
 
+  REQUIRE(env.is_known(Atom("e")));
+  REQUIRE(env.is_exp(Atom("e")));
+
+  REQUIRE(env.is_known(Atom("I")));
+  REQUIRE(env.is_exp(Atom("I")));
+
   REQUIRE(!env.is_known(Atom("hi")));
   REQUIRE(!env.is_exp(Atom("hi")));
 
@@ -19,6 +25,17 @@ TEST_CASE( "Test default constructor", "[environment]" ) {
   REQUIRE(env.is_proc(Atom("-")));
   REQUIRE(env.is_proc(Atom("*")));
   REQUIRE(env.is_proc(Atom("/")));
+  REQUIRE(env.is_proc(Atom("sqrt")));
+  REQUIRE(env.is_proc(Atom("^")));
+  REQUIRE(env.is_proc(Atom("ln")));
+  REQUIRE(env.is_proc(Atom("sin")));
+  REQUIRE(env.is_proc(Atom("cos")));
+  REQUIRE(env.is_proc(Atom("tan")));
+  REQUIRE(env.is_proc(Atom("real")));
+  REQUIRE(env.is_proc(Atom("imag")));
+  REQUIRE(env.is_proc(Atom("mag")));
+  REQUIRE(env.is_proc(Atom("arg")));
+  REQUIRE(env.is_proc(Atom("conj")));
   REQUIRE(!env.is_proc(Atom("op")));
 }
 
@@ -63,6 +80,15 @@ TEST_CASE( "Test get built-in procedure", "[environment]" ) {
   args.emplace_back(1.0);
   args.emplace_back(2.0);
   REQUIRE(padd(args) == Expression(3.0));
+
+  INFO("trying complex add procedure")
+  args.clear();
+  std::complex<double> a(0,1);
+  std::complex<double> b(0,2);
+  std::complex<double> c(0,3);
+  args.emplace_back(a);
+  args.emplace_back(b);
+  REQUIRE(padd(args) == Expression(c));
 }
 
 TEST_CASE( "Test reset", "[environment]" ) {
