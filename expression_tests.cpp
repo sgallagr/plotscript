@@ -27,3 +27,11 @@ TEST_CASE( "Test symbol expression", "[expression]" ) {
   REQUIRE(exp.isHeadSymbol());
 }
 
+TEST_CASE( "Test complex expression", "[expression]" ) {
+  std::complex<double> I(5,6);
+
+  Expression exp(I);
+
+  REQUIRE(exp.isHeadComplex());
+  REQUIRE(!exp.isHeadSymbol());
+}
