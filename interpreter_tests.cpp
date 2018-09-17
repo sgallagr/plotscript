@@ -363,10 +363,30 @@ TEST_CASE( "Test complex procedures", "[interpreter]" ) {
 
 TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
   
-  std::vector<std::string> programs = {"(@ none)", // so such procedure
+  std::vector<std::string> programs = {"(@ none)", // no such procedure
 				       "(- 1 1 2)", // too many arguments
 				       "(define begin 1)", // redefine special form
-				       "(define pi 3.14)"}; // redefine builtin symbol
+				       "(define pi 3.14)", // redefine builtin symbol
+					   "(/ 1)",		// incorrect number of arguments
+					   "(sqrt 1 2)",
+					   "(^ 4 5 6)",
+					   "(ln 4 5)",
+				       "(sin 2 3)",
+					   "(cos 6 7)",
+					   "(tan 8 9)",
+					   "(real I I)",
+					   "(imag I I)",
+					   "(mag I I)",
+					   "(arg I I)",
+					   "(conj I I)",
+					   "(sin I)",	// invalid arguments
+					   "(cos I)",
+					   "(tan I)",
+					   "(real 3)",
+					   "(imag 4)",
+					   "(mag 5)",
+					   "(arg 6)",
+					   "(conj 7)",};
     for(auto s : programs){
       Interpreter interp;
 
