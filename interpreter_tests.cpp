@@ -248,9 +248,9 @@ TEST_CASE( "Test number procedures", "[interpreter]" ) {
 					 "(* 1 -1)",
 					 "(* 1 1 -1)",
 					 "(/ -1 1)",
-					 "(/ 1 -1)"
-					 "(- 0 (^ 8 0))"
-				     "(- 0 (ln 1))",
+					 "(/ 1 -1)",
+					 "(- 0 (^ 8 0))",
+				     "(- (ln 1) 1)",
 					 "(- (sin 0) 1)",
 					 "(- 0 (cos 0))",
 					 "(- (tan 0) 1)"};
@@ -262,6 +262,104 @@ TEST_CASE( "Test number procedures", "[interpreter]" ) {
   }
 }
 
+TEST_CASE( "Test complex procedures", "[interpreter]" ) {
+  std::complex<double> ans(0.,0.);
+  Expression result;
+
+  std::string program;
+  
+  INFO("trying complex add and negate")
+  program = "(+ I (- I))";
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex subtract 1")
+  program =  "(- I I)";
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex subtract 2")
+  program = "(- I 0)";
+  result = run(program);
+  ans.imag(1.);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex subtract 3")
+  program = "(- 0 I)";
+  result = run(program);
+  ans.imag(-1.);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex divide 1")
+  program =  "(/ I I)";
+  result = run(program);
+  ans.real(1.);
+  ans.imag(0.);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex divide 2")
+  program = "(/ I 1)";
+  result = run(program);
+  ans.real(0.);
+  ans.imag(1.);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex divide 3")
+  program = "(/ 1 I)";
+  result = run(program);
+  ans.imag(-1.);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying real")
+  program = "(real I)";
+  result = run(program);
+  REQUIRE(result == Expression(0.));
+
+  INFO("trying imag")
+  program = "(imag I)";
+  result = run(program);
+  REQUIRE(result == Expression(1.));
+
+  INFO("trying mag")
+  program = "(mag I)";
+  result = run(program);
+  REQUIRE(result == Expression(1.));
+
+  INFO("trying arg")
+  program = "(- (arg I) (arg I))";
+  result = run(program);
+  REQUIRE(result == Expression(0.));
+
+  INFO("trying conj")
+  program = "(conj I)";
+  result = run(program);
+  ans.real(0.);
+  ans.imag(-1.);
+  REQUIRE(result == Expression(ans));
+
+  ans.real(0);
+  ans.imag(0);
+
+  INFO("trying sqrt")
+  program = "(- (sqrt I) (sqrt I))";
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex power 1")
+  program =  "(- (^ I I) (^ I I))";
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex power 2")
+  program = "(- (^ I 1) (^ I 1))";
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex power 3")
+  program = "(- (^ 1 I) (^ 1 I))";
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+}
 
 TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
   
