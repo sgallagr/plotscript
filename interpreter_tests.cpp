@@ -238,7 +238,7 @@ TEST_CASE( "Test a medium-sized expression", "[interpreter]" ) {
   }
 }
 
-TEST_CASE( "Test arithmetic procedures", "[interpreter]" ) {
+TEST_CASE( "Test number procedures", "[interpreter]" ) {
 
   {
     std::vector<std::string> programs = {"(+ 1 -2)",
@@ -248,7 +248,12 @@ TEST_CASE( "Test arithmetic procedures", "[interpreter]" ) {
 					 "(* 1 -1)",
 					 "(* 1 1 -1)",
 					 "(/ -1 1)",
-					 "(/ 1 -1)"};
+					 "(/ 1 -1)"
+					 "(- 0 (^ 8 0))"
+				     "(- 0 (ln 1))",
+					 "(- (sin 0) 1)",
+					 "(- 0 (cos 0))",
+					 "(- (tan 0) 1)"};
 
     for(auto s : programs){
       Expression result = run(s);
