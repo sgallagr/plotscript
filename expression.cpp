@@ -1,7 +1,6 @@
 #include "expression.hpp"
 
 #include <sstream>
-#include <list>
 
 #include "environment.hpp"
 #include "semantic_error.hpp"
@@ -60,7 +59,6 @@ bool Expression::isHeadComplex() const noexcept {
 void Expression::append(const Atom & a){
   m_tail.emplace_back(a);
 }
-
 
 Expression * Expression::tail(){
   Expression * ptr = nullptr;
@@ -167,12 +165,14 @@ Expression Expression::handle_define(Environment & env){
   return result;
 }
 
+
 // this is a simple recursive version. the iterative version is more
 // difficult with the ast data structure used (no parent pointer).
 // this limits the practical depth of our AST
 Expression Expression::eval(Environment & env){
   
-  if(m_tail.empty()){
+  // list can be empty
+  if(m_tail.empty() && m_head.asSymbol() != "list"){
     return handle_lookup(m_head, env);
   }
   // handle begin special-form
@@ -206,6 +206,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;
+	if (e != exp.tailConstEnd() - 1) out << " ";
   }
 
   if(!complex) out << ")";

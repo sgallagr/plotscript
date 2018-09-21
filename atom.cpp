@@ -175,12 +175,12 @@ bool Atom::operator==(const Atom & right) const noexcept{
     }
     break;
   case ComplexKind:
-  {
-	if(right.m_type != ComplexKind) return false;
+    {
+	  if(right.m_type != ComplexKind) return false;
 
-	return complexValue == right.complexValue;
-  }
-  break;
+	  return complexValue == right.complexValue;
+    }
+    break;
   default:
     return false;
   }

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
+#include <list>
 
 #include "environment.hpp"
 #include "semantic_error.hpp"
@@ -441,6 +442,35 @@ Expression conj(const std::vector<Expression> & args){
   return Expression(result);
 };
 
+Expression list(const std::vector<Expression> & args){
+
+  Expression result;
+
+  for (auto & a : args) {
+	if (a.isHeadNumber()) {
+	  result.append(a.head());
+	}
+	else if (a.isHeadComplex()) {
+	  result.append(a.head());
+	}
+	else {
+	  throw SemanticError("Error in call to build list: argument not a number or complex number");
+	}
+  }
+
+  return Expression(result);
+};
+
+Expression first(const std::vector<Expression> & args){
+  
+	if (args.capacity() > 0) {
+	  return Expression(args.front());
+    }
+	else {
+	  throw SemanticError("Error in call to first: list is empty");
+	}
+};
+
 const double PI = std::atan2(0, -1);
 const double EXP = std::exp(1);
 const std::complex<double> I(0,1);
@@ -573,4 +603,7 @@ void Environment::reset(){
 
   // Procedure: conj;
   envmap.emplace("conj", EnvResult(ProcedureType, conj));
+
+  // Procedure: list;
+  envmap.emplace("list", EnvResult(ProcedureType, list));
 }
