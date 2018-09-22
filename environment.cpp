@@ -484,7 +484,8 @@ Expression first(const std::vector<Expression> & args){
 
 Expression rest(const std::vector<Expression> & args) {
 
-  Expression result;
+  Atom listHead("list");
+  Expression result(listHead);
 
   if (nargs_equal(args, 1)) {
     if (args[0].isList()) {
@@ -494,20 +495,45 @@ Expression rest(const std::vector<Expression> & args) {
 	    }
 	  }
 	  else {
-	    throw SemanticError("Error in call to first: argument is an empty list");
+	    throw SemanticError("Error in call to rest: argument is an empty list");
 	  }
 	}
 	else {
-	  throw SemanticError("Error in call to first: argument not a list");
+	  throw SemanticError("Error in call to rest: argument not a list");
 	}
   }
   else {
-	throw SemanticError("Error in call to first: more than one argument");
+	throw SemanticError("Error in call to rest: more than one argument");
   }
 
   return result;
+};
 
-}
+Expression length(const std::vector<Expression> & args) {
+  
+  int result = 0;
+
+  if (nargs_equal(args, 1)) {
+    if (args[0].isList()) {
+	  if (args[0].tailConstBegin() == args[0].tailConstEnd()) {
+        return Expression(result);
+	  }
+	  else {
+	    for (auto e = args[0].tailConstBegin(); e != args[0].tailConstEnd(); ++e) {
+	      result++;
+	    }
+	  }
+	}
+	else {
+	  throw SemanticError("Error in call to length: argument not a list");
+	}
+  }
+  else {
+	throw SemanticError("Error in call to length: more than one argument");
+  }
+
+  return Expression(result);
+};
 
 const double PI = std::atan2(0, -1);
 const double EXP = std::exp(1);
@@ -650,4 +676,7 @@ void Environment::reset(){
 
   // Procedure: rest;
   envmap.emplace("rest", EnvResult(ProcedureType, rest));
+
+  // Procedure: length;
+  envmap.emplace("length", EnvResult(ProcedureType, length));
 }
