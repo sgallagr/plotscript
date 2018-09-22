@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
-#include <list>
+#include <string>
 
 #include "environment.hpp"
 #include "semantic_error.hpp"
@@ -444,21 +444,20 @@ Expression conj(const std::vector<Expression> & args){
 
 Expression list(const std::vector<Expression> & args){
 
-  Expression result;
+  Atom listHead("list");
+  Expression result(listHead);
 
   for (auto & a : args) {
-	if (a.isHeadNumber()) {
-	  result.append(a.head());
-	}
-	else if (a.isHeadComplex()) {
+	if (a.isHeadNumber() || a.isHeadComplex() || a.isList()) {
 	  result.append(a.head());
 	}
 	else {
-	  throw SemanticError("Error in call to build list: argument not a number or complex number");
+	  throw SemanticError("Error in call to build list: argument not a number, complex number, or list");
 	}
   }
+  
 
-  return Expression(result);
+  return result;
 };
 
 Expression first(const std::vector<Expression> & args){

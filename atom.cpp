@@ -108,7 +108,7 @@ void Atom::setSymbol(const std::string & value){
   if(m_type == SymbolKind){
     stringValue.~basic_string();
   }
-    
+   
   m_type = SymbolKind;
 
   // copy construct in place

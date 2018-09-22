@@ -56,6 +56,10 @@ bool Expression::isHeadComplex() const noexcept {
   return m_head.isComplex();
 }
 
+bool Expression::isList() const noexcept {
+  return m_head.asSymbol() == "list";
+}
+
 void Expression::append(const Atom & a){
   m_tail.emplace_back(a);
 }
@@ -202,7 +206,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   if(!complex) out << "(";
 
-  out << exp.head();
+  if (!exp.isList()) out << exp.head();
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;

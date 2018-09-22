@@ -62,8 +62,11 @@ public:
   /// convienience member to determine if head atom is a symbol
   bool isHeadSymbol() const noexcept;
 
-  /// convienience member to determine if head atom is comlex
+  /// convienience member to determine if head atom is complex
   bool isHeadComplex() const noexcept;
+
+  /// convienience member to determine if head atom is complex
+  bool isList() const noexcept;
 
   /// Evaluate expression using a post-order traversal (recursive)
   Expression eval(Environment & env);
