@@ -452,7 +452,7 @@ Expression list(const std::vector<Expression> & args){
 	  result.append(a);
 	}
 	else {
-	  throw SemanticError("Error in call to build list: argument not a number, complex number, or list");
+	  throw SemanticError("Error in call to build list: invalid argument");
 	}
   }
   
@@ -533,6 +533,36 @@ Expression length(const std::vector<Expression> & args) {
   }
 
   return Expression(result);
+};
+
+Expression append(const std::vector<Expression> & args){
+
+  Atom listHead("list");
+  Expression result(listHead);
+
+  if (nargs_equal(args, 2)) {
+    if (args[0].isList()) {
+
+	  for (auto e = args[0].tailConstBegin(); e != args[0].tailConstEnd(); ++e) {
+	      result.append(*e);
+	  }
+
+	  if (args[1].isHeadNumber() || args[1].isHeadComplex() || args[1].isList()) {
+		  result.append(args[1]);
+	  }
+	  else {
+        throw SemanticError("Error in call to append: invalid second argument");
+      }
+	}
+	else {
+      throw SemanticError("Error in call to append: first argument not a list");
+    }
+  }
+  else {
+    throw SemanticError("Error in call to append: invalid number of arguments");
+  }
+  
+  return result;
 };
 
 const double PI = std::atan2(0, -1);
@@ -679,4 +709,7 @@ void Environment::reset(){
 
   // Procedure: length;
   envmap.emplace("length", EnvResult(ProcedureType, length));
+
+  // Procedure: append;
+  envmap.emplace("append", EnvResult(ProcedureType, append));
 }
