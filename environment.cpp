@@ -449,14 +449,13 @@ Expression list(const std::vector<Expression> & args){
 
   for (auto & a : args) {
 	if (a.isHeadNumber() || a.isHeadComplex() || a.isList()) {
-	  result.append(a.head());
+	  result.append(a);
 	}
 	else {
 	  throw SemanticError("Error in call to build list: argument not a number, complex number, or list");
 	}
   }
   
-
   return result;
 };
 
