@@ -460,13 +460,11 @@ Expression list(const std::vector<Expression> & args){
 };
 
 Expression first(const std::vector<Expression> & args){
-  
-  Expression result;
 
   if (nargs_equal(args, 1)) {
     if (args[0].isList()) {
 	  if (args[0].tailConstBegin() != args[0].tailConstEnd()) {
-	    return result = *args[0].tailConstBegin();
+	    return Expression(*args[0].tailConstBegin());
 	  }
 	  else {
 	    throw SemanticError("Error in call to first: argument is an empty list");
@@ -562,6 +560,76 @@ Expression append(const std::vector<Expression> & args){
     throw SemanticError("Error in call to append: invalid number of arguments");
   }
   
+  return result;
+};
+
+Expression join(const std::vector<Expression> & args){
+
+  Atom listHead("list");
+  Expression result(listHead);
+
+  if (nargs_equal(args, 2)) {
+    if (args[0].isList()) {
+
+	  for (auto e = args[0].tailConstBegin(); e != args[0].tailConstEnd(); ++e) {
+	      result.append(*e);
+	  }
+
+	  if (args[1].isList()) {
+	    for (auto e = args[1].tailConstBegin(); e != args[1].tailConstEnd(); ++e) {
+	      result.append(*e);
+	    }
+	  }
+	  else {
+        throw SemanticError("Error in call to join: second argument not a list");
+      }
+	}
+	else {
+      throw SemanticError("Error in call to append: first argument not a list");
+    }
+  }
+  else {
+    throw SemanticError("Error in call to append: invalid number of arguments");
+  }
+  
+  return result;
+};
+
+Expression range(const std::vector<Expression> & args) {
+
+  Atom listHead("list");
+  Expression result(listHead);
+
+  double begin = args[0].head().asNumber();
+
+  if (nargs_equal(args, 3)) {
+	if (args[0].isHeadNumber() && args[1].isHeadNumber() && args[2].isHeadNumber()) {
+      if (args[0].head().asNumber() < args[1].head().asNumber()) {
+		if (args[2].head().asNumber() > 0) {
+	      double begin = args[0].head().asNumber();
+		  double end = args[1].head().asNumber();
+		  double inc = args[2].head().asNumber();
+
+		  for (double i = begin; i <= end; i += inc) {
+		    result.append(i);
+		  }
+		}
+		else {
+          throw SemanticError("Error in call to range: negative or zero increment");
+        }
+	  }
+	  else {
+        throw SemanticError("Error in call to range: begin greater than or equal to end");
+      }
+	}
+	else {
+      throw SemanticError("Error in call to range: invalid argument");
+    }
+  }
+  else {
+    throw SemanticError("Error in call to range: invalid number of arguments");
+  }
+
   return result;
 };
 
@@ -712,4 +780,10 @@ void Environment::reset(){
 
   // Procedure: append;
   envmap.emplace("append", EnvResult(ProcedureType, append));
+
+  // Procedure: join;
+  envmap.emplace("join", EnvResult(ProcedureType, join));
+
+  // Procedure: range;
+  envmap.emplace("range", EnvResult(ProcedureType, range));
 }
