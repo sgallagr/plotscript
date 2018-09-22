@@ -461,11 +461,23 @@ Expression list(const std::vector<Expression> & args){
 
 Expression first(const std::vector<Expression> & args){
   
-	if (args.capacity() > 0) {
-	  return Expression(args.front());
-    }
+	Expression result;
+
+	if (nargs_equal(args, 1)) {
+	  if (args[0].isList()) {
+		if (args[0].tailConstBegin() != args[0].tailConstEnd()) {
+		  return result = *args[0].tailConstBegin();
+		}
+		else {
+		  throw SemanticError("Error in call to first: argument is an empty list");
+		}
+	  }
+	  else {
+	    throw SemanticError("Error in call to first: argument not a list");
+	  }
+	}
 	else {
-	  throw SemanticError("Error in call to first: list is empty");
+	  throw SemanticError("Error in call to first: more than one argument");
 	}
 };
 
@@ -604,4 +616,7 @@ void Environment::reset(){
 
   // Procedure: list;
   envmap.emplace("list", EnvResult(ProcedureType, list));
+
+  // Procedure: first;
+  envmap.emplace("first", EnvResult(ProcedureType, first));
 }
