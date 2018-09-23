@@ -108,10 +108,10 @@ Expression apply(const Atom & op, const std::vector<Expression> & args, const En
 Expression Expression::handle_lookup(const Atom & head, const Environment & env){
     if(head.isSymbol()){ // if symbol is in env return value
       if(env.is_exp(head)){
-	return env.get_exp(head);
+				return env.get_exp(head);
       }
       else{
-	throw SemanticError("Error during evaluation: unknown symbol");
+				throw SemanticError("Error during evaluation: unknown symbol");
       }
     }
     else if(head.isNumber()){
@@ -214,7 +214,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;
-	if (e != exp.tailConstEnd() - 1) out << " ";
+		if (e != exp.tailConstEnd() - 1) out << " ";
   }
 
   if(!complex) out << ")";
@@ -230,8 +230,8 @@ bool Expression::operator==(const Expression & exp) const noexcept{
 
   if(result){
     for(auto lefte = m_tail.begin(), righte = exp.m_tail.begin();
-	(lefte != m_tail.end()) && (righte != exp.m_tail.end());
-	++lefte, ++righte){
+		(lefte != m_tail.end()) && (righte != exp.m_tail.end());
+		++lefte, ++righte){
       result = result && (*lefte == *righte);
     }
   }

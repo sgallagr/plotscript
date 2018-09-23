@@ -19,12 +19,12 @@ Token::TokenType Token::type() const{
 
 std::string Token::asString() const{
   switch(m_type){
-  case OPEN:
-    return "(";
-  case CLOSE:
-    return ")";
-  case STRING:
-    return value;
+		case OPEN:
+			return "(";
+		case CLOSE:
+			return ")";
+		case STRING:
+			return value;
   }
   return "";
 }
@@ -49,7 +49,7 @@ TokenSequenceType tokenize(std::istream & seq){
     if(c == COMMENTCHAR){
       // chomp until the end of the line
       while((!seq.eof()) && (c != '\n')){
-	c = seq.get();
+				c = seq.get();
       }
       if(seq.eof()) break;
     }
