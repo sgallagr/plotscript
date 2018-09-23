@@ -40,7 +40,7 @@ Expression parse(const TokenSequenceType &tokens) noexcept {
     if (t.type() == Token::OPEN) {
       athead = true;
     } 
-		else if (t.type() == Token::CLOSE) {
+    else if (t.type() == Token::CLOSE) {
       if (stack.empty()) {
         return Expression();
       }
@@ -51,7 +51,7 @@ Expression parse(const TokenSequenceType &tokens) noexcept {
         break;
       }
     } 
-		else {
+    else {
       if (athead) {
         if (stack.empty()) {
           if (!setHead(ast, t)) {
@@ -59,7 +59,7 @@ Expression parse(const TokenSequenceType &tokens) noexcept {
           }
           stack.push(&ast);
         } 
-				else {
+        else {
           if (stack.empty()) {
             return Expression();
           }
@@ -71,7 +71,7 @@ Expression parse(const TokenSequenceType &tokens) noexcept {
         }
         athead = false;
       } 
-			else {
+      else {
         if (stack.empty()) {
           return Expression();
         }

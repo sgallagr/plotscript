@@ -108,10 +108,10 @@ Expression apply(const Atom & op, const std::vector<Expression> & args, const En
 Expression Expression::handle_lookup(const Atom & head, const Environment & env){
     if(head.isSymbol()){ // if symbol is in env return value
       if(env.is_exp(head)){
-				return env.get_exp(head);
+        return env.get_exp(head);
       }
       else{
-				throw SemanticError("Error during evaluation: unknown symbol");
+        throw SemanticError("Error during evaluation: unknown symbol");
       }
     }
     else if(head.isNumber()){
@@ -159,7 +159,52 @@ Expression Expression::handle_define(Environment & env){
   if(env.is_proc(m_head)){
     throw SemanticError("Error during evaluation: attempt to redefine a built-in procedure");
   }
-	
+  
+  // eval tail[1]
+  Expression result = m_tail[1].eval(env);
+
+  if(env.is_exp(m_head)){
+    throw SemanticError("Error during evaluation: attempt to redefine a previously defined symbol");
+  }
+    
+  //and add to env
+  env.add_exp(m_tail[0].head(), result);
+  
+  return result;
+}
+
+
+Expression Expression::handle_lambda(Environment & env){
+
+  // tail must have size 3 or error
+  if(m_tail.size() != 2){
+    throw SemanticError("Error during evaluation: invalid number of arguments to lambda");
+  }
+
+  if(m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd()){
+    throw SemanticError("Error during evaluation: no input parameters specified");
+  }
+  
+  for (auto e = m_tail[0].tailConstBegin(); e != m_tail[0].tailConstEnd(); ++e) {
+        if(!*e.isHeadSymbol())
+  }
+
+
+  // tail[0] must be symbol
+  if(!m_tail[0].isHeadSymbol()){
+    throw SemanticError("Error during evaluation: first argument to define not symbol");
+  }
+
+  // but tail[0] must not be a special-form or procedure
+  std::string s = m_tail[0].head().asSymbol();
+  if((s == "define") || (s == "begin")){
+    throw SemanticError("Error during evaluation: attempt to redefine a special-form");
+  }
+  
+  if(env.is_proc(m_head)){
+    throw SemanticError("Error during evaluation: attempt to redefine a built-in procedure");
+  }
+  
   // eval tail[1]
   Expression result = m_tail[1].eval(env);
 
@@ -191,6 +236,10 @@ Expression Expression::eval(Environment & env){
   else if(m_head.isSymbol() && m_head.asSymbol() == "define"){
     return handle_define(env);
   }
+  // handle lambda special-form
+  else if(m_head.isSymbol() && m_head.asSymbol() == "lambda"){
+    return handle_lambda(env);
+  }
   // else attempt to treat as procedure
   else{ 
     std::vector<Expression> results;
@@ -214,7 +263,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;
-		if (e != exp.tailConstEnd() - 1) out << " ";
+    if (e != exp.tailConstEnd() - 1) out << " ";
   }
 
   if(!complex) out << ")";
@@ -230,8 +279,8 @@ bool Expression::operator==(const Expression & exp) const noexcept{
 
   if(result){
     for(auto lefte = m_tail.begin(), righte = exp.m_tail.begin();
-		(lefte != m_tail.end()) && (righte != exp.m_tail.end());
-		++lefte, ++righte){
+    (lefte != m_tail.end()) && (righte != exp.m_tail.end());
+    ++lefte, ++righte){
       result = result && (*lefte == *righte);
     }
   }
