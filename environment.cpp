@@ -164,7 +164,21 @@ Expression div(const std::vector<Expression> & args){
   bool complex = false;
 
   // preconditions
-  if(nargs_equal(args,2)){
+  if (nargs_equal(args, 1)) {
+    if (args[0].isHeadNumber()){
+      result = 1.0 / args[0].head().asNumber();
+    }
+    else if (args[0].isHeadComplex()) {
+      result_c = 1.0 / args[0].head().asComplex();
+      complex = true;
+    }
+    else{      
+      throw SemanticError("Error in call to division: invalid argument.");
+    }
+  }
+
+
+  else if(nargs_equal(args, 2)){
     if( (args[0].isHeadNumber()) && (args[1].isHeadNumber()) ){
       result = args[0].head().asNumber() / args[1].head().asNumber();
     }
