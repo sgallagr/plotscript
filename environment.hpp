@@ -83,6 +83,12 @@ public:
   */
   Procedure get_proc(const Atom &sym) const;
 
+  /*! Add a mapping from sym argument to the proc argument within the environment.
+    \param sym the symbol to add
+    \param proc the non-evaluated procedure the symbol should map to
+  */
+  void add_proc(const Atom &sym, const Expression &exp);
+
   /*! Reset the environment to its default state. */
   void reset();
 

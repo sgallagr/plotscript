@@ -68,8 +68,11 @@ public:
   /// convienience member to determine if head atom is complex
   bool isHeadComplex() const noexcept;
 
-  /// convienience member to determine if head atom is complex
+  /// convienience member to determine if head atom is lambda
   bool isList() const noexcept;
+
+  /// convienience member to determine if head atom is lambda
+  bool isLambda() const noexcept;
 
   /// Evaluate expression using a post-order traversal (recursive)
   Expression eval(Environment & env);
@@ -93,6 +96,7 @@ private:
   Expression handle_lookup(const Atom & head, const Environment & env);
   Expression handle_define(Environment & env);
   Expression handle_begin(Environment & env);
+	Expression handle_lambda(Environment & env);
 };
 
 /// Render expression to output stream

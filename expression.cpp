@@ -60,6 +60,10 @@ bool Expression::isList() const noexcept {
   return m_head.asSymbol() == "list";
 }
 
+bool Expression::isLambda() const noexcept {
+  return m_head.asSymbol() == "lambda";
+}
+
 void Expression::append(const Atom & a){
   m_tail.emplace_back(a);
 }
@@ -152,7 +156,7 @@ Expression Expression::handle_define(Environment & env){
 
   // but tail[0] must not be a special-form or procedure
   std::string s = m_tail[0].head().asSymbol();
-  if((s == "define") || (s == "begin")){
+  if((s == "define") || (s == "begin") || (s == "lambda")){
     throw SemanticError("Error during evaluation: attempt to redefine a special-form");
   }
   
@@ -161,14 +165,17 @@ Expression Expression::handle_define(Environment & env){
   }
   
   // eval tail[1]
-  Expression result = m_tail[1].eval(env);
+  Expression result;
+  if (m_tail[1].head().asSymbol() == "lambda") result = m_tail[1].m_tail[1];
+  else result = m_tail[1].eval(env);
 
   if(env.is_exp(m_head)){
     throw SemanticError("Error during evaluation: attempt to redefine a previously defined symbol");
   }
     
   //and add to env
-  env.add_exp(m_tail[0].head(), result);
+  if(m_tail[1].head().asSymbol() == "lambda") env.add_proc(m_tail[0].head(), result);
+  else env.add_exp(m_tail[0].head(), result);
   
   return result;
 }
@@ -180,41 +187,44 @@ Expression Expression::handle_lambda(Environment & env){
   if(m_tail.size() != 2){
     throw SemanticError("Error during evaluation: invalid number of arguments to lambda");
   }
-
-  if(m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd()){
-    throw SemanticError("Error during evaluation: no input parameters specified");
-  }
   
   for (auto e = m_tail[0].tailConstBegin(); e != m_tail[0].tailConstEnd(); ++e) {
-        if(!*e.isHeadSymbol())
+    if (!Expression(*e).isHeadSymbol()) {
+      throw SemanticError("Error during evaluation: invalid parameter for lambda");
+    }
   }
 
-
-  // tail[0] must be symbol
-  if(!m_tail[0].isHeadSymbol()){
-    throw SemanticError("Error during evaluation: first argument to define not symbol");
-  }
-
-  // but tail[0] must not be a special-form or procedure
+  // tail[0] must not be a special-form or procedure
   std::string s = m_tail[0].head().asSymbol();
-  if((s == "define") || (s == "begin")){
-    throw SemanticError("Error during evaluation: attempt to redefine a special-form");
+  if((s == "define") || (s == "begin") || (s == "lambda")){
+    throw SemanticError("Error during evaluation: attempt to use special-form as parameter symbol");
   }
   
   if(env.is_proc(m_head)){
-    throw SemanticError("Error during evaluation: attempt to redefine a built-in procedure");
+    throw SemanticError("Error during evaluation: attempt to use procedure as parameter symbol");
   }
   
-  // eval tail[1]
-  Expression result = m_tail[1].eval(env);
-
-  if(env.is_exp(m_head)){
-    throw SemanticError("Error during evaluation: attempt to redefine a previously defined symbol");
+  // tail[1] stored as lambda procedure
+  Expression params;
+  params.append(m_tail[0].head());
+  for (auto e = m_tail[0].tailConstBegin(); e != m_tail[0].tailConstEnd(); ++e) {
+    params.append(*e);
   }
+  Expression function = m_tail[1];
+
+  Atom resultHead("lambda");
+  Expression result(resultHead);
+  result.append(params);
+  result.append(function);
+  /*if(env.is_exp(m_head)){
+    throw SemanticError("Error during evaluation: attempt to redefine a previously defined symbol");
+  }*/
     
   //and add to env
-  env.add_exp(m_tail[0].head(), result);
+  //env.add_exp(m_tail[0].head(), result);
+  //env.add_exp(m_tail, result);
   
+  //return *result.tail();
   return result;
 }
 
@@ -224,7 +234,7 @@ Expression Expression::handle_lambda(Environment & env){
 // this limits the practical depth of our AST
 Expression Expression::eval(Environment & env){
   
-  // list can be empty
+  // lookup only if tail is empty and the head is not list
   if(m_tail.empty() && m_head.asSymbol() != "list"){
     return handle_lookup(m_head, env);
   }
@@ -259,7 +269,10 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   if(!complex) out << "(";
 
-  if (!exp.isList()) out << exp.head();
+  if (!exp.isList() && !exp.isLambda()) {
+    out << exp.head();
+    if (exp.isHeadSymbol() && (exp.tailConstBegin() != exp.tailConstEnd())) out << " ";
+  }
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;

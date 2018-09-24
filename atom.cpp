@@ -158,22 +158,28 @@ bool Atom::operator==(const Atom & right) const noexcept{
       if(right.m_type != NoneKind) return false;
       break;
     case NumberKind:
-      if(right.m_type != NumberKind) return false;
-      double dleft = numberValue;
-      double dright = right.numberValue;
-      double diff = fabs(dleft - dright);
-      if(std::isnan(diff) ||
-      (diff > std::numeric_limits<double>::epsilon())) return false;
+      {
+        if(right.m_type != NumberKind) return false;
+        double dleft = numberValue;
+        double dright = right.numberValue;
+        double diff = fabs(dleft - dright);
+        if(std::isnan(diff) ||
+        (diff > std::numeric_limits<double>::epsilon())) return false;
+      }
       break;
     case SymbolKind:
-      if(right.m_type != SymbolKind) return false;
+      {
+        if(right.m_type != SymbolKind) return false;
 
-      return stringValue == right.stringValue;
+        return stringValue == right.stringValue;
+      }
       break;
     case ComplexKind:
-      if(right.m_type != ComplexKind) return false;
+      {
+        if(right.m_type != ComplexKind) return false;
 
-      return complexValue == right.complexValue;
+        return complexValue == right.complexValue;
+      }
       break;
     default:
       return false;

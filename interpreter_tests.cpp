@@ -386,7 +386,7 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
 					   "(imag 4)",
 					   "(mag 5)",
 					   "(arg 6)",
-					   "(conj 7)",};
+					   "(conj 7)"};
     for(auto s : programs){
       Interpreter interp;
 
@@ -397,6 +397,29 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
       
       REQUIRE_THROWS_AS(interp.evaluate(), SemanticError);
     }
+}
+
+TEST_CASE("Test lambda procedures", "[interpreter]") {
+  std::complex<double> ans = 4;
+  Expression result;
+
+  INFO("trying to run defined lambda procedure")
+
+  Interpreter interp;
+
+  std::istringstream iss("(define f (lambda (x) (* 2 x)))");
+  bool ok = interp.parseStream(iss);
+  REQUIRE(ok == true);
+  interp.evaluate();
+
+  iss.clear();
+  iss.str("(f 2)");
+  ok = interp.parseStream(iss);
+  REQUIRE(ok == true);
+
+  result = interp.evaluate();
+
+  REQUIRE(result == Expression(ans));
 }
 
 TEST_CASE( "Test for exceptions from semantically incorrect input", "[interpreter]" ) {

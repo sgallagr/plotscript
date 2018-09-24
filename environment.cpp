@@ -704,6 +704,20 @@ Procedure Environment::get_proc(const Atom & sym) const{
   return default_proc;
 }
 
+void Environment::add_proc(const Atom & sym, const Expression & proc){
+
+  if(!sym.isSymbol()){
+    throw SemanticError("Attempt to add non-symbol to environment");
+  }
+    
+  // error if overwriting symbol map
+  if(envmap.find(sym.asSymbol()) != envmap.end()){
+    throw SemanticError("Attempt to overwrite symbol in environemnt");
+  }
+
+  envmap.emplace(sym.asSymbol(), EnvResult(ProcedureType, proc)); 
+}
+
 /*
 Reset the environment to the default state. First remove all entries and
 then re-add the default ones.
