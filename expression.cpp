@@ -276,6 +276,23 @@ Expression Expression::eval(Environment & env){
         return function.eval(envcopy);
       }
     }
+    else if (m_head.isSymbol() && m_head.asSymbol() == "apply") {
+      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
+        if (m_tail[1].isList()) {
+          Expression result(m_tail[0].head());
+          for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
+            result.append(*it);
+          }
+          return result.eval(env);
+        }
+        else {
+          throw SemanticError("Error in call to apply: second argument not a list");
+        }
+      }
+      else {
+        throw SemanticError("Error in call to apply: first argument not a procedure");
+      }
+    }
     else{
       for(Expression::IteratorType it = m_tail.begin(); it != m_tail.end(); ++it){
         results.push_back(it->eval(env));
