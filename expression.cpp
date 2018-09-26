@@ -166,16 +166,23 @@ Expression Expression::handle_define(Environment & env){
   
   // eval tail[1]
   Expression result;
-  if (m_tail[1].head().asSymbol() == "lambda") result = m_tail[1].m_tail[1];
-  else result = m_tail[1].eval(env);
+  /*std::vector<Expression> function;
+  Expression proc;
+  if (m_tail[1].head().asSymbol() == "lambda"){
+    result = m_tail[1];
+    for (auto e = m_tail[1].tailConstBegin(); e != m_tail[1].tailConstEnd(); ++e) {
+      function.push_back(Expression(*e));
+    }
+  }*/
+  result = m_tail[1].eval(env);
 
-  if(env.is_exp(m_head)){
+  /*if(env.is_exp(m_head)){
     throw SemanticError("Error during evaluation: attempt to redefine a previously defined symbol");
-  }
+  }*/
     
   //and add to env
-  if(m_tail[1].head().asSymbol() == "lambda") env.add_proc(m_tail[0].head(), result);
-  else env.add_exp(m_tail[0].head(), result);
+  //if(m_tail[1].head().asSymbol() == "lambda") env.add_proc(m_tail[0].head(), function);
+  env.add_exp(m_tail[0].head(), result);
   
   return result;
 }
@@ -204,16 +211,15 @@ Expression Expression::handle_lambda(Environment & env){
     throw SemanticError("Error during evaluation: attempt to use procedure as parameter symbol");
   }
   
-  // tail[1] stored as lambda procedure
   Expression params;
   params.append(m_tail[0].head());
   for (auto e = m_tail[0].tailConstBegin(); e != m_tail[0].tailConstEnd(); ++e) {
     params.append(*e);
   }
+
   Expression function = m_tail[1];
 
-  Atom resultHead("lambda");
-  Expression result(resultHead);
+  Expression result(Atom("lambda"));
   result.append(params);
   result.append(function);
   /*if(env.is_exp(m_head)){
@@ -233,7 +239,7 @@ Expression Expression::handle_lambda(Environment & env){
 // difficult with the ast data structure used (no parent pointer).
 // this limits the practical depth of our AST
 Expression Expression::eval(Environment & env){
-  
+
   // lookup only if tail is empty and the head is not list
   if(m_tail.empty() && m_head.asSymbol() != "list"){
     return handle_lookup(m_head, env);
@@ -253,10 +259,29 @@ Expression Expression::eval(Environment & env){
   // else attempt to treat as procedure
   else{ 
     std::vector<Expression> results;
-    for(Expression::IteratorType it = m_tail.begin(); it != m_tail.end(); ++it){
-      results.push_back(it->eval(env));
+
+    if (env.get_exp(m_head).head().asSymbol() == "lambda") {
+      Expression params = env.get_exp(m_head).m_tail[0];
+      Expression function = env.get_exp(m_head).m_tail[1];
+      if (params.m_tail.size() == m_tail.size()) {
+        Environment envcopy = env;
+        int count = 0;
+        for (auto it = params.tailConstBegin(); it != params.tailConstEnd(); ++it ) {
+          Expression singleparam(Atom("define"));
+          singleparam.append(*it);
+          singleparam.append(m_tail[count]);
+          singleparam.eval(envcopy);
+          ++count;
+        }
+        return function.eval(envcopy);
+      }
     }
-    return apply(m_head, results, env);
+    else{
+      for(Expression::IteratorType it = m_tail.begin(); it != m_tail.end(); ++it){
+        results.push_back(it->eval(env));
+      }
+      return apply(m_head, results, env);
+    }
   }
 }
 
