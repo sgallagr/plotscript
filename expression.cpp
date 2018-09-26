@@ -275,6 +275,9 @@ Expression Expression::eval(Environment & env){
         }
         return function.eval(envcopy);
       }
+      else {
+        throw SemanticError("Error in call to lambda procedure: invalid number of arguments");
+      }
     }
     else if (m_head.isSymbol() && m_head.asSymbol() == "apply") {
       if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
@@ -291,6 +294,26 @@ Expression Expression::eval(Environment & env){
       }
       else {
         throw SemanticError("Error in call to apply: first argument not a procedure");
+      }
+    }
+    else if (m_head.isSymbol() && m_head.asSymbol() == "map") {
+      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
+        if (m_tail[1].isList()) {
+          Atom proc = m_tail[0].head();
+          Expression result;
+          for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
+            Expression temp(proc);
+            temp.append(*it);
+            result.append(temp.eval(env));
+          }
+          return result;
+        }
+        else {
+          throw SemanticError("Error in call to map: second argument not a list");
+        }
+      }
+      else {
+        throw SemanticError("Error in call to map: first argument not a procedure");
       }
     }
     else{
