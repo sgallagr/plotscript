@@ -691,7 +691,7 @@ void Environment::add_exp(const Atom & sym, const Expression & exp){
     
   // error if overwriting symbol map
   if(envmap.find(sym.asSymbol()) != envmap.end()){
-    throw SemanticError("Attempt to overwrite symbol in environemnt");
+    envmap[sym.asSymbol()] = EnvResult(ExpressionType, exp);
   }
 
   envmap.emplace(sym.asSymbol(), EnvResult(ExpressionType, exp)); 
