@@ -177,7 +177,7 @@ Expression div(const std::vector<Expression> & args){
     }
   }
 
-
+  // preconditions
   else if(nargs_equal(args, 2)){
     if( (args[0].isHeadNumber()) && (args[1].isHeadNumber()) ){
       result = args[0].head().asNumber() / args[1].head().asNumber();
@@ -458,9 +458,9 @@ Expression conj(const std::vector<Expression> & args){
 
 Expression list(const std::vector<Expression> & args){
 
-  Atom listHead("list");
-  Expression result(listHead);
+  Expression result(Atom("list"));
 
+  // check if all arguments are valid while adding to list
   for (auto & a : args) {
     if (a.isHeadNumber() || a.isHeadComplex() || a.isList()) {
       result.append(a);
@@ -475,6 +475,7 @@ Expression list(const std::vector<Expression> & args){
 
 Expression first(const std::vector<Expression> & args){
 
+  // preconditions
   if (nargs_equal(args, 1)) {
     if (args[0].isList()) {
       if (args[0].tailConstBegin() != args[0].tailConstEnd()) {
@@ -496,14 +497,14 @@ Expression first(const std::vector<Expression> & args){
 
 Expression rest(const std::vector<Expression> & args) {
 
-  Atom listHead("list");
-  Expression result(listHead);
+  Expression result(Atom("list"));
 
+  // preconditions
   if (nargs_equal(args, 1)) {
     if (args[0].isList()) {
       if (args[0].tailConstBegin() != args[0].tailConstEnd()) {
-        for (auto e = args[0].tailConstBegin() + 1; e != args[0].tailConstEnd(); ++e) {
-          result.append(*e);
+        for (auto it = args[0].tailConstBegin() + 1; it != args[0].tailConstEnd(); ++it) {
+          result.append(*it);
         }
       }
       else {
@@ -525,13 +526,14 @@ Expression length(const std::vector<Expression> & args) {
   
   int result = 0;
 
+  // preconditions
   if (nargs_equal(args, 1)) {
     if (args[0].isList()) {
       if (args[0].tailConstBegin() == args[0].tailConstEnd()) {
         return Expression(result);
       }
       else {
-        for (auto e = args[0].tailConstBegin(); e != args[0].tailConstEnd(); ++e) {
+        for (auto it = args[0].tailConstBegin(); it != args[0].tailConstEnd(); ++it) {
           result++;
         }
       }
@@ -549,17 +551,16 @@ Expression length(const std::vector<Expression> & args) {
 
 Expression append(const std::vector<Expression> & args){
 
-  Atom listHead("list");
-  Expression result(listHead);
+  Expression result(Atom("list"));
 
+  // preconditions
   if (nargs_equal(args, 2)) {
     if (args[0].isList()) {
-
-      for (auto e = args[0].tailConstBegin(); e != args[0].tailConstEnd(); ++e) {
-        result.append(*e);
-      }
-
       if (args[1].isHeadNumber() || args[1].isHeadComplex() || args[1].isList()) {
+        for (auto it = args[0].tailConstBegin(); it != args[0].tailConstEnd(); ++it) {
+          result.append(*it);
+        }
+        
         result.append(args[1]);
       }
       else {
@@ -579,19 +580,16 @@ Expression append(const std::vector<Expression> & args){
 
 Expression join(const std::vector<Expression> & args){
 
-  Atom listHead("list");
-  Expression result(listHead);
+  Expression result(Atom("list"));
 
+  // preconditions
   if (nargs_equal(args, 2)) {
     if (args[0].isList()) {
-
-      for (auto e = args[0].tailConstBegin(); e != args[0].tailConstEnd(); ++e) {
-        result.append(*e);
-      }
-
       if (args[1].isList()) {
-        for (auto e = args[1].tailConstBegin(); e != args[1].tailConstEnd(); ++e) {
-          result.append(*e);
+        for (int i = 0; i < 2; ++i) {
+          for (auto it = args[i].tailConstBegin(); it != args[i].tailConstEnd(); ++it) {
+            result.append(*it);
+          }
         }
       }
       else {
@@ -611,11 +609,9 @@ Expression join(const std::vector<Expression> & args){
 
 Expression range(const std::vector<Expression> & args) {
 
-  Atom listHead("list");
-  Expression result(listHead);
+  Expression result(Atom("list"));
 
-  double begin = args[0].head().asNumber();
-
+  // preconditions
   if (nargs_equal(args, 3)) {
     if (args[0].isHeadNumber() && args[1].isHeadNumber() && args[2].isHeadNumber()) {
       if (args[0].head().asNumber() < args[1].head().asNumber()) {
@@ -689,7 +685,7 @@ void Environment::add_exp(const Atom & sym, const Expression & exp){
     throw SemanticError("Attempt to add non-symbol to environment");
   }
     
-  // error if overwriting symbol map
+  // allow variable shadowing
   if(envmap.find(sym.asSymbol()) != envmap.end()){
     envmap[sym.asSymbol()] = EnvResult(ExpressionType, exp);
   }
@@ -706,8 +702,6 @@ bool Environment::is_proc(const Atom & sym) const{
 
 Procedure Environment::get_proc(const Atom & sym) const{
 
-  //Procedure proc = default_proc;
-
   if(sym.isSymbol()){
     auto result = envmap.find(sym.asSymbol());
     if((result != envmap.end()) && (result->second.type == ProcedureType)){
@@ -716,20 +710,6 @@ Procedure Environment::get_proc(const Atom & sym) const{
   }
 
   return default_proc;
-}
-
-void Environment::add_proc(const Atom & sym, const Expression & proc){
-
-  if(!sym.isSymbol()){
-    throw SemanticError("Attempt to add non-symbol to environment");
-  }
-    
-  // error if overwriting symbol map
-  if(envmap.find(sym.asSymbol()) != envmap.end()){
-    throw SemanticError("Attempt to overwrite symbol in environemnt");
-  }
-
-  envmap.emplace(sym.asSymbol(), EnvResult(ProcedureType, proc)); 
 }
 
 /*

@@ -165,23 +165,13 @@ Expression Expression::handle_define(Environment & env){
   }
   
   // eval tail[1]
-  Expression result;
-  /*std::vector<Expression> function;
-  Expression proc;
-  if (m_tail[1].head().asSymbol() == "lambda"){
-    result = m_tail[1];
-    for (auto e = m_tail[1].tailConstBegin(); e != m_tail[1].tailConstEnd(); ++e) {
-      function.push_back(Expression(*e));
-    }
-  }*/
-  result = m_tail[1].eval(env);
+  Expression result = m_tail[1].eval(env);
 
-  /*if(env.is_exp(m_head)){
+  if(env.is_exp(m_head)){
     throw SemanticError("Error during evaluation: attempt to redefine a previously defined symbol");
-  }*/
+  }
     
   //and add to env
-  //if(m_tail[1].head().asSymbol() == "lambda") env.add_proc(m_tail[0].head(), function);
   env.add_exp(m_tail[0].head(), result);
   
   return result;
@@ -195,8 +185,9 @@ Expression Expression::handle_lambda(Environment & env){
     throw SemanticError("Error during evaluation: invalid number of arguments to lambda");
   }
   
-  for (auto e = m_tail[0].tailConstBegin(); e != m_tail[0].tailConstEnd(); ++e) {
-    if (!Expression(*e).isHeadSymbol()) {
+  // tail[0] must contain symbols only
+  for (auto it = m_tail[0].tailConstBegin(); it != m_tail[0].tailConstEnd(); ++it) {
+    if (!Expression(*it).isHeadSymbol()) {
       throw SemanticError("Error during evaluation: invalid parameter for lambda");
     }
   }
@@ -211,26 +202,21 @@ Expression Expression::handle_lambda(Environment & env){
     throw SemanticError("Error during evaluation: attempt to use procedure as parameter symbol");
   }
   
+  // create list of parameter symbols
   Expression params;
   params.append(m_tail[0].head());
   for (auto e = m_tail[0].tailConstBegin(); e != m_tail[0].tailConstEnd(); ++e) {
     params.append(*e);
   }
 
-  Expression function = m_tail[1];
+  // create procedure expression
+  Expression proc = m_tail[1];
 
+  // create full lambda expression
   Expression result(Atom("lambda"));
   result.append(params);
-  result.append(function);
-  /*if(env.is_exp(m_head)){
-    throw SemanticError("Error during evaluation: attempt to redefine a previously defined symbol");
-  }*/
-    
-  //and add to env
-  //env.add_exp(m_tail[0].head(), result);
-  //env.add_exp(m_tail, result);
-  
-  //return *result.tail();
+  result.append(proc);
+
   return result;
 }
 
@@ -260,28 +246,44 @@ Expression Expression::eval(Environment & env){
   else{ 
     std::vector<Expression> results;
 
+    // lambda procedure -----------------------------------------------------------------------------------
     if (env.get_exp(m_head).head().asSymbol() == "lambda") {
       Expression params = env.get_exp(m_head).m_tail[0];
-      Expression function = env.get_exp(m_head).m_tail[1];
+      Expression proc = env.get_exp(m_head).m_tail[1];
+
+      // preconditions
       if (params.m_tail.size() == m_tail.size()) {
-        Environment envcopy = env;
+        // create shadow environment
+        Environment shadow = env;
+
         int count = 0;
-        for (auto it = params.tailConstBegin(); it != params.tailConstEnd(); ++it ) {
+
+        // link respective values to parameter variables
+        for (auto it = params.tailConstBegin(); it != params.tailConstEnd(); ++it) {
           Expression singleparam(Atom("define"));
           singleparam.append(*it);
           singleparam.append(m_tail[count]);
-          singleparam.eval(envcopy);
+          singleparam.eval(shadow);
           ++count;
         }
-        return function.eval(envcopy);
+
+        // evaluate lambda procedure with passed paramter values
+        return proc.eval(shadow);
       }
       else {
         throw SemanticError("Error in call to lambda procedure: invalid number of arguments");
       }
     }
+
+    // apply procedure -----------------------------------------------------------------------------------
     else if (m_head.isSymbol() && m_head.asSymbol() == "apply") {
-      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
+
+      // preconditions
+      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || 
+          env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
         if (m_tail[1].isList()) {
+
+          // move procedure and arguments into evaluable expression and evaluate
           Expression result(m_tail[0].head());
           for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
             result.append(*it);
@@ -296,9 +298,16 @@ Expression Expression::eval(Environment & env){
         throw SemanticError("Error in call to apply: first argument not a procedure");
       }
     }
+
+    // map procedure -----------------------------------------------------------------------------------
     else if (m_head.isSymbol() && m_head.asSymbol() == "map") {
-      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
+
+      // preconditions
+      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || 
+          env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
         if (m_tail[1].isList()) {
+
+          // evaluate each argument according to procedure and place in result list
           Atom proc = m_tail[0].head();
           Expression result;
           for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
@@ -316,6 +325,8 @@ Expression Expression::eval(Environment & env){
         throw SemanticError("Error in call to map: first argument not a procedure");
       }
     }
+
+    // basic procedure -----------------------------------------------------------------------------------
     else{
       for(Expression::IteratorType it = m_tail.begin(); it != m_tail.end(); ++it){
         results.push_back(it->eval(env));
@@ -334,14 +345,14 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   if(!complex) out << "(";
 
-  if (!exp.isList() && !exp.isLambda()) {
-    out << exp.head();
-    if (exp.isHeadSymbol() && (exp.tailConstBegin() != exp.tailConstEnd())) out << " ";
-  }
+  // prevent showing heads for list or lambda expressions
+  if (!exp.isList() && !exp.isLambda()) out << exp.head();
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;
-    if (e != exp.tailConstEnd() - 1) out << " ";
+
+    // space expression outputs correctly
+    if (exp.isHeadSymbol() && e != exp.tailConstEnd() - 1) out << " ";
   }
 
   if(!complex) out << ")";
