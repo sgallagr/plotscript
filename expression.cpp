@@ -326,7 +326,7 @@ Expression Expression::eval(Environment & env){
       }
     }
 
-    // basic procedure -----------------------------------------------------------------------------------
+    // basic procedures -----------------------------------------------------------------------------------
     else{
       for(Expression::IteratorType it = m_tail.begin(); it != m_tail.end(); ++it){
         results.push_back(it->eval(env));
