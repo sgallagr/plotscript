@@ -346,13 +346,16 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
   if(!complex) out << "(";
 
   // prevent showing heads for list or lambda expressions
-  if (!exp.isList() && !exp.isLambda()) out << exp.head();
+  if (!exp.isList() && !exp.isLambda()) { 
+    out << exp.head();
+
+    // display procedure heads correctly
+    if (exp.isHeadSymbol() && (exp.tailConstBegin() != exp.tailConstEnd())) out << " ";
+  }
 
   for(auto e = exp.tailConstBegin(); e != exp.tailConstEnd(); ++e){
     out << *e;
-
-    // space expression outputs correctly
-    if (exp.isHeadSymbol() && e != exp.tailConstEnd() - 1) out << " ";
+    if (e != exp.tailConstEnd() - 1) out << " ";
   }
 
   if(!complex) out << ")";
