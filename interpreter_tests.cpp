@@ -273,6 +273,11 @@ TEST_CASE( "Test complex procedures", "[interpreter]" ) {
   result = run(program);
   REQUIRE(result == Expression(ans));
 
+  INFO("trying complex multiply")
+  program = "(- (* I I) (* I I))";
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+
   INFO("trying complex subtract 1")
   program =  "(- I I)";
   result = run(program);
@@ -306,6 +311,12 @@ TEST_CASE( "Test complex procedures", "[interpreter]" ) {
 
   INFO("trying complex divide 3")
   program = "(/ 1 I)";
+  result = run(program);
+  ans.imag(-1.);
+  REQUIRE(result == Expression(ans));
+
+  INFO("trying complex divide 4")
+  program = "(/ I)";
   result = run(program);
   ans.imag(-1.);
   REQUIRE(result == Expression(ans));
@@ -345,6 +356,14 @@ TEST_CASE( "Test complex procedures", "[interpreter]" ) {
   result = run(program);
   REQUIRE(result == Expression(ans));
 
+  INFO("trying sqrt of -1")
+  program = "(sqrt -1)";
+  ans.imag(1);
+  result = run(program);
+  REQUIRE(result == Expression(ans));
+
+  ans.imag(0);
+
   INFO("trying complex power 1")
   program =  "(- (^ I I) (^ I I))";
   result = run(program);
@@ -364,14 +383,22 @@ TEST_CASE( "Test complex procedures", "[interpreter]" ) {
 TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
   
   std::vector<std::string> programs = {"(@ none)", // no such procedure
-				       "(- 1 1 2)", // too many arguments
-				       "(define begin 1)", // redefine special form
-				       "(define pi 3.14)", // redefine builtin symbol
-					   "(/ 1)",		// incorrect number of arguments
+             "(+ 1)", // too few arguments
+             "(* 1)",
+             "(+ 1 (list 1 2 3))", // invalid argument
+             "(* 1 (list 1 2 3))",
+             "(- 1 (list 1 2 3))",
+             "(/ 1 (list 1 2 3))",
+             "(sqrt (list 1 2 3))",
+             "(^ (list 1) (list 2))",
+             "(ln (list 1 2 3))",
+				     "(define begin 1)", // redefine special form
+             "(- 1 1 2)", // too many arguments
+             "(/ 1 2 3)",
 					   "(sqrt 1 2)",
 					   "(^ 4 5 6)",
 					   "(ln 4 5)",
-				       "(sin 2 3)",
+				     "(sin 2 3)",
 					   "(cos 6 7)",
 					   "(tan 8 9)",
 					   "(real I I)",
@@ -400,7 +427,7 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
 }
 
 TEST_CASE("Test lambda procedures", "[interpreter]") {
-  std::complex<double> ans = 4;
+  double ans = 4;
   Expression result;
 
   INFO("trying to run defined lambda procedure")
