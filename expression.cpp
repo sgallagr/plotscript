@@ -312,7 +312,7 @@ Expression Expression::eval(Environment & env){
 
           // evaluate each argument according to procedure and place in result list
           Atom proc = m_tail[0].head();
-          Expression result;
+          Expression result(Atom("list"));
           for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
             Expression temp(proc);
             temp.append(*it);
