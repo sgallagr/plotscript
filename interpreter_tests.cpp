@@ -242,18 +242,18 @@ TEST_CASE( "Test number procedures", "[interpreter]" ) {
 
   {
     std::vector<std::string> programs = {"(+ 1 -2)",
-					 "(+ -3 1 1)",
-					 "(- 1)",
-					 "(- 1 2)",
-					 "(* 1 -1)",
-					 "(* 1 1 -1)",
-					 "(/ -1 1)",
-					 "(/ 1 -1)",
-					 "(- 0 (^ 8 0))",
-				     "(- (ln 1) 1)",
-					 "(- (sin 0) 1)",
-					 "(- 0 (cos 0))",
-					 "(- (tan 0) 1)"};
+           "(+ -3 1 1)",
+           "(- 1)",
+           "(- 1 2)",
+           "(* 1 -1)",
+           "(* 1 1 -1)",
+           "(/ -1 1)",
+           "(/ 1 -1)",
+           "(- 0 (^ 8 0))",
+             "(- (ln 1) 1)",
+           "(- (sin 0) 1)",
+           "(- 0 (cos 0))",
+           "(- (tan 0) 1)"};
 
     for(auto s : programs){
       Expression result = run(s);
@@ -412,31 +412,35 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
              "(lambda (3) (* 3 3))",
              "(lambda (begin) (* 2 2))",
              "(lambda (+) (+ 2 2))",
-				     "(define begin 1)", // redefine special form
+             "(apply 3 (list 1 2 3))",
+             "(apply + 3)",
+             "(map 3 (list 1 2 3))",
+             "(map + 3)",
+             "(define begin 1)", // redefine special form
              "(- 1 1 2)", // too many arguments
              "(/ 1 2 3)",
-					   "(sqrt 1 2)",
-					   "(^ 4 5 6)",
-					   "(ln 4 5)",
-				     "(sin 2 3)",
-					   "(cos 6 7)",
-					   "(tan 8 9)",
-					   "(real I I)",
-					   "(imag I I)",
-					   "(mag I I)",
-					   "(arg I I)",
-					   "(conj I I)",
+             "(sqrt 1 2)",
+             "(^ 4 5 6)",
+             "(ln 4 5)",
+             "(sin 2 3)",
+             "(cos 6 7)",
+             "(tan 8 9)",
+             "(real I I)",
+             "(imag I I)",
+             "(mag I I)",
+             "(arg I I)",
+             "(conj I I)",
              "(first (list 1) (list 2))",
              "(rest (list 1) (list 2))",
              "(length (list 1) (list 2))",
-					   "(sin I)",	// invalid arguments
-					   "(cos I)",
-					   "(tan I)",
-					   "(real 3)",
-					   "(imag 4)",
-					   "(mag 5)",
-					   "(arg 6)",
-					   "(conj 7)"};
+             "(sin I)",	// invalid arguments
+             "(cos I)",
+             "(tan I)",
+             "(real 3)",
+             "(imag 4)",
+             "(mag 5)",
+             "(arg 6)",
+             "(conj 7)"};
     for(auto s : programs){
       Interpreter interp;
 
@@ -449,11 +453,11 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
     }
 }
 
-TEST_CASE("Test lambda procedures", "[interpreter]") {
+TEST_CASE("Test lambda procedure", "[interpreter]") {
   double ans = 4;
   Expression result;
 
-  INFO("trying to run defined lambda procedure")
+  INFO("trying to run lambda procedure with too many arguments")
 
   Interpreter interp;
 
@@ -463,13 +467,23 @@ TEST_CASE("Test lambda procedures", "[interpreter]") {
   interp.evaluate();
 
   iss.clear();
+  iss.str("(f 2 3)");
+  ok = interp.parseStream(iss);
+  REQUIRE(ok == true);
+
+  REQUIRE_THROWS_AS(interp.evaluate(), SemanticError);
+
+
+  INFO("trying to run lambda procedure")
+
+  iss.clear();
   iss.str("(f 2)");
   ok = interp.parseStream(iss);
   REQUIRE(ok == true);
 
   result = interp.evaluate();
 
-  REQUIRE(result == Expression(ans));
+  REQUIRE(result == Expression(4.));
 }
 
 TEST_CASE("Test list procedures", "[interpreter]") {
@@ -511,6 +525,22 @@ TEST_CASE("Test list procedures", "[interpreter]") {
   program = "(length (range 1 2 1))";
   result = run(program);
   REQUIRE(result == Expression(2.));
+}
+
+TEST_CASE("Test apply and map procedures", "[interpreter]") {
+  Expression result;
+
+  std::string program;
+
+  INFO("trying apply")
+  program = "(apply + (list 1 2 3))";
+  result = run(program);
+  REQUIRE(result == Expression(6.));
+
+  INFO("trying map")
+  program = "(length (map / (list 1 2 3)))";
+  result = run(program);
+  REQUIRE(Expression(result) == Expression(3.));
 }
 
 TEST_CASE( "Test for exceptions from semantically incorrect input", "[interpreter]" ) {
