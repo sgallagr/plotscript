@@ -385,6 +385,9 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
   std::vector<std::string> programs = {"(@ none)", // no such procedure
              "(+ 1)", // too few arguments
              "(* 1)",
+             "(append 1)",
+             "(join 1)",
+             "(range 1)",
              "(+ 1 (list 1 2 3))", // invalid argument
              "(* 1 (list 1 2 3))",
              "(- 1 (list 1 2 3))",
@@ -392,6 +395,23 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
              "(sqrt (list 1 2 3))",
              "(^ (list 1) (list 2))",
              "(ln (list 1 2 3))",
+             "(first 1)",
+             "(first (list))",
+             "(rest 1)",
+             "(rest (list))", 
+             "(length 1)",
+             "(append (list 1 2 3) (lambda (x y) (* x y)))",
+             "(append 1 2)",
+             "(join 1 (list 1 2 3))",
+             "(join (list 1 2 3) 1)",
+             "(range 0 1 -1)",
+             "(range 1 1 1)",
+             "(range 1 1 I)",
+             "(list 1 2 (lambda (x) (* 2 x)))",
+             "(define 3 4)",
+             "(lambda (3) (* 3 3))",
+             "(lambda (begin) (* 2 2))",
+             "(lambda (+) (+ 2 2))",
 				     "(define begin 1)", // redefine special form
              "(- 1 1 2)", // too many arguments
              "(/ 1 2 3)",
@@ -406,6 +426,9 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
 					   "(mag I I)",
 					   "(arg I I)",
 					   "(conj I I)",
+             "(first (list 1) (list 2))",
+             "(rest (list 1) (list 2))",
+             "(length (list 1) (list 2))",
 					   "(sin I)",	// invalid arguments
 					   "(cos I)",
 					   "(tan I)",
@@ -447,6 +470,47 @@ TEST_CASE("Test lambda procedures", "[interpreter]") {
   result = interp.evaluate();
 
   REQUIRE(result == Expression(ans));
+}
+
+TEST_CASE("Test list procedures", "[interpreter]") {
+  Expression result;
+
+  std::string program;
+
+  INFO("trying first")
+  program = "(first (list 1 2 3))";
+  result = run(program);
+  REQUIRE(result == Expression(1.));
+
+  INFO("trying rest")
+  program = "(first (rest (list 2 1)))";
+  result = run(program);
+  REQUIRE(Expression(result) == Expression(1.));
+
+  INFO("trying length with empty list")
+  program = "(length (list))";
+  result = run(program);
+  REQUIRE(result == Expression(0.));
+
+  INFO("trying length")
+  program = "(length (list 1 2 3))";
+  result = run(program);
+  REQUIRE(result == Expression(3.));
+
+  INFO("trying append")
+  program = "(length (append (list 1) (list 1)))";
+  result = run(program);
+  REQUIRE(result == Expression(2.));
+
+  INFO("trying join")
+  program = "(length (join (list 1) (list 2)))";
+  result = run(program);
+  REQUIRE(result == Expression(2.));
+
+  INFO("trying range")
+  program = "(length (range 1 2 1))";
+  result = run(program);
+  REQUIRE(result == Expression(2.));
 }
 
 TEST_CASE( "Test for exceptions from semantically incorrect input", "[interpreter]" ) {
