@@ -186,6 +186,9 @@ Expression Expression::handle_lambda(Environment & env){
   }
   
   // tail[0] must contain symbols only
+  if (!m_tail[0].isHeadSymbol()) {
+    throw SemanticError("Error during evaluation: invalid parameter for lambda");
+  }
   for (auto it = m_tail[0].tailConstBegin(); it != m_tail[0].tailConstEnd(); ++it) {
     if (!Expression(*it).isHeadSymbol()) {
       throw SemanticError("Error during evaluation: invalid parameter for lambda");
@@ -198,8 +201,8 @@ Expression Expression::handle_lambda(Environment & env){
     throw SemanticError("Error during evaluation: attempt to use special-form as parameter symbol");
   }
   
-  if(env.is_proc(m_head)){
-    throw SemanticError("Error during evaluation: attempt to use procedure as parameter symbol");
+  if(env.is_proc(m_tail[0].head())){
+    throw SemanticError("Error during evaluation: attempt to use existing procedure as parameter symbol");
   }
   
   // create list of parameter symbols
