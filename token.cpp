@@ -63,8 +63,6 @@ TokenSequenceType tokenize(std::istream & seq){
       tokens.push_back(Token::TokenType::CLOSE);
     }
     else if (c == LITERALCHAR) {
-      std::string temp = "string";
-      store_ifnot_empty(temp, tokens);
       token.push_back(c);
 
       // store entire string in one token

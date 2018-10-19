@@ -29,7 +29,6 @@ Expression parse(const TokenSequenceType &tokens) noexcept {
     return Expression();
 
   bool athead = false;
-  bool str = false;
 
   // stack tracks the last node created
   std::stack<Expression *> stack;
@@ -51,13 +50,9 @@ Expression parse(const TokenSequenceType &tokens) noexcept {
         num_tokens_seen += 1;
         break;
       }
-
-      if (str) str = false;
     } 
     else {
-      if (athead || t.asString() == "string") {
-        if (t.asString() == "string") str = true;
-
+      if (athead) {
         if (stack.empty()) {
           if (!setHead(ast, t)) {
             return Expression();
@@ -83,10 +78,6 @@ Expression parse(const TokenSequenceType &tokens) noexcept {
 
         if (!append(stack.top(), t)) {
           return Expression();
-        }
-        if (str) {
-          stack.pop();
-          str = false;
         }
       }
     }

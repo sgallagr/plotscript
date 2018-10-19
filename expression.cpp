@@ -65,7 +65,7 @@ bool Expression::isLambda() const noexcept {
 }
 
 bool Expression::isStringLit() const noexcept {
-  return m_head.asSymbol() == "string";
+  return m_head.asSymbol().front() == '"';
 }
 
 void Expression::append(const Atom & a){
@@ -117,6 +117,9 @@ Expression Expression::handle_lookup(const Atom & head, const Environment & env)
     if(head.isSymbol()){ // if symbol is in env return value
       if(env.is_exp(head)){
         return env.get_exp(head);
+      }
+      if (head.asSymbol().front() == '"') {
+        return Expression(head);
       }
       else{
         throw SemanticError("Error during evaluation: unknown symbol");
@@ -232,11 +235,6 @@ Expression Expression::eval(Environment & env){
   // lookup only if tail is empty and the head is not list
   if(m_tail.empty() && m_head.asSymbol() != "list"){
     return handle_lookup(m_head, env);
-  }
-  else if (m_head.isSymbol() && m_head.asSymbol() == "string") {
-    Expression result(Atom("string")); 
-    result.append(m_tail[0].head());
-    return result;
   }
   // handle begin special-form
   else if(m_head.isSymbol() && m_head.asSymbol() == "begin"){
