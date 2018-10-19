@@ -19,6 +19,11 @@ Expression::Expression(const Expression & a){
   for(auto e : a.m_tail){
     m_tail.push_back(e);
   }
+
+  // carry over properties if any
+  if (!a.propmap.empty()) {
+    propmap = a.propmap;
+  }
 }
 
 Expression & Expression::operator=(const Expression & a){
@@ -30,6 +35,11 @@ Expression & Expression::operator=(const Expression & a){
     for(auto e : a.m_tail){
       m_tail.push_back(e);
     } 
+
+    // carry over properties if any
+    if (!a.propmap.empty()) {
+      propmap = a.propmap;
+    }
   }
   
   return *this;
@@ -183,7 +193,7 @@ Expression Expression::handle_define(Environment & env){
 
 Expression Expression::handle_lambda(Environment & env){
 
-  // tail must have size 3 or error
+  // tail must have size 2 or error
   if(m_tail.size() != 2){
     throw SemanticError("Error during evaluation: invalid number of arguments to lambda");
   }
@@ -226,6 +236,73 @@ Expression Expression::handle_lambda(Environment & env){
   return result;
 }
 
+void Expression::set_property(const Atom & sym, const Expression & exp){
+    
+  // allow overwriting of properties
+  if(propmap.find(sym.asSymbol()) != propmap.end()){
+    propmap[sym.asSymbol()] = exp;
+  }
+
+  propmap.emplace(sym.asSymbol(),exp); 
+}
+
+Expression Expression::get_property(const Atom & sym) const{
+  Expression exp;
+  
+  if(sym.isSymbol()){
+    auto result = propmap.find(sym.asSymbol());
+    if(result != propmap.end()){
+      exp = result->second;
+    }
+  }
+
+  return exp;
+}
+
+Expression Expression::handle_set_property(Environment & env){
+
+  // tail must have size 3 or error
+  if(m_tail.size() != 3){
+    throw SemanticError("Error during evaluation: invalid number of arguments to set-property");
+  }
+  
+  // tail[0] must contain a string
+  if (!m_tail[0].isStringLit()) {
+    throw SemanticError("Error during evaluation: first argument to set-property not a string");
+  }
+  
+  Atom key = m_tail[0].head().asSymbol();
+
+  Expression value = m_tail[1].eval(env);
+
+  Expression result = m_tail[2].eval(env);
+
+  result.set_property(key, value);
+
+  return result;
+}
+
+Expression Expression::handle_get_property(Environment & env){
+
+  // tail must have size 2 or error
+  if(m_tail.size() != 2){
+    throw SemanticError("Error during evaluation: invalid number of arguments to get-property");
+  }
+  
+  // tail[0] must contain a string
+  if (!m_tail[0].isStringLit()) {
+    throw SemanticError("Error during evaluation: first argument to get-property not a string");
+  }
+
+  if (!env.is_exp(m_tail[1].head())) {
+    throw SemanticError("Error during evaluation: first argument to get-property not an expression");
+  }
+
+  Expression result = env.get_exp(m_tail[1].head()).get_property(m_tail[0].head());
+
+  return result;
+}
+
 
 // this is a simple recursive version. the iterative version is more
 // difficult with the ast data structure used (no parent pointer).
@@ -247,6 +324,14 @@ Expression Expression::eval(Environment & env){
   // handle lambda special-form
   else if(m_head.isSymbol() && m_head.asSymbol() == "lambda"){
     return handle_lambda(env);
+  }
+  // handle set-property special procedure
+  else if (m_head.isSymbol() && m_head.asSymbol() == "set-property") {
+    return handle_set_property(env);
+  }
+  // handle get-property special procedure
+  else if (m_head.isSymbol() && m_head.asSymbol() == "get-property") {
+    return handle_get_property(env);
   }
   // else attempt to treat as procedure
   else{ 
@@ -347,14 +432,17 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   // prevent double parentheses with complex results
   bool complex = false;
-  bool str = false;
   if (exp.head().isComplex()) complex = true;
-  if (exp.head().asSymbol() == "string") str = true;
 
-  if(!complex && !str) out << "(";
+  if ((exp.head().isNone() || exp.isList()) && (exp.tailConstBegin() == exp.tailConstEnd())){ 
+    out << "NONE";
+    return out;
+  }
+
+  if(!complex) out << "(";
 
   // prevent showing heads for list or lambda expressions
-  if (!exp.isList() && !exp.isLambda() && !str) { 
+  if (!exp.isList() && !exp.isLambda()) { 
     out << exp.head();
 
     // display procedure heads correctly
@@ -366,7 +454,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
     if (e != exp.tailConstEnd() - 1) out << " ";
   }
 
-  if(!complex && !str) out << ")";
+  if(!complex) out << ")";
 
   return out;
 }
