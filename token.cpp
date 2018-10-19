@@ -8,6 +8,7 @@
 const char OPENCHAR = '(';
 const char CLOSECHAR = ')';
 const char COMMENTCHAR = ';';
+const char LITERALCHAR = '"';
 
 Token::Token(TokenType t): m_type(t){}
 
@@ -60,6 +61,24 @@ TokenSequenceType tokenize(std::istream & seq){
     else if(c == CLOSECHAR){
       store_ifnot_empty(token, tokens);
       tokens.push_back(Token::TokenType::CLOSE);
+    }
+    else if (c == LITERALCHAR) {
+      std::string temp = "string";
+      store_ifnot_empty(temp, tokens);
+      token.push_back(c);
+
+      // store entire string in one token
+      while((!seq.eof()) && (seq.peek() != LITERALCHAR)){
+        c = seq.get();
+        token.push_back(c);
+      }
+
+      if (!seq.eof()) {
+        c = seq.get();
+        token.push_back(c);
+        store_ifnot_empty(token, tokens);
+      }
+      else break;
     }
     else if(isspace(c)){
       store_ifnot_empty(token, tokens);

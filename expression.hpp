@@ -74,6 +74,9 @@ public:
   /// convienience member to determine if head atom is lambda
   bool isLambda() const noexcept;
 
+  /// convienience member to determine if head atom is a string literal
+  bool isStringLit() const noexcept;
+
   /// Evaluate expression using a post-order traversal (recursive)
   Expression eval(Environment & env);
 

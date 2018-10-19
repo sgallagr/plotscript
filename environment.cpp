@@ -462,7 +462,7 @@ Expression list(const std::vector<Expression> & args){
 
   // check if all arguments are valid while adding to list
   for (auto & a : args) {
-    if (a.isHeadNumber() || a.isHeadComplex() || a.isList()) {
+    if (a.isHeadNumber() || a.isHeadComplex() || a.isList() || a.isStringLit()) {
       result.append(a);
     }
     else {

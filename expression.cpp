@@ -64,6 +64,10 @@ bool Expression::isLambda() const noexcept {
   return m_head.asSymbol() == "lambda";
 }
 
+bool Expression::isStringLit() const noexcept {
+  return m_head.asSymbol() == "string";
+}
+
 void Expression::append(const Atom & a){
   m_tail.emplace_back(a);
 }
@@ -229,6 +233,11 @@ Expression Expression::eval(Environment & env){
   if(m_tail.empty() && m_head.asSymbol() != "list"){
     return handle_lookup(m_head, env);
   }
+  else if (m_head.isSymbol() && m_head.asSymbol() == "string") {
+    Expression result(Atom("string")); 
+    result.append(m_tail[0].head());
+    return result;
+  }
   // handle begin special-form
   else if(m_head.isSymbol() && m_head.asSymbol() == "begin"){
     return handle_begin(env);
@@ -340,12 +349,14 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
 
   // prevent double parentheses with complex results
   bool complex = false;
+  bool str = false;
   if (exp.head().isComplex()) complex = true;
+  if (exp.head().asSymbol() == "string") str = true;
 
-  if(!complex) out << "(";
+  if(!complex && !str) out << "(";
 
   // prevent showing heads for list or lambda expressions
-  if (!exp.isList() && !exp.isLambda()) { 
+  if (!exp.isList() && !exp.isLambda() && !str) { 
     out << exp.head();
 
     // display procedure heads correctly
@@ -357,7 +368,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
     if (e != exp.tailConstEnd() - 1) out << " ";
   }
 
-  if(!complex) out << ")";
+  if(!complex && !str) out << ")";
 
   return out;
 }
