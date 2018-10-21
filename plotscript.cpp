@@ -5,6 +5,7 @@
 
 #include "interpreter.hpp"
 #include "semantic_error.hpp"
+#include "startup_config.hpp"
 
 void prompt(){
   std::cout << "\nplotscript> ";
@@ -25,9 +26,7 @@ void info(const std::string & err_str){
   std::cout << "Info: " << err_str << std::endl;
 }
 
-int eval_from_stream(std::istream & stream){
-
-  Interpreter interp;
+int eval_from_stream(std::istream & stream, Interpreter & interp){
   
   if(!interp.parseStream(stream)){
     error("Invalid Program. Could not parse.");
@@ -47,7 +46,7 @@ int eval_from_stream(std::istream & stream){
   return EXIT_SUCCESS;
 }
 
-int eval_from_file(std::string filename){
+int eval_from_file(std::string filename, Interpreter & interp){
       
   std::ifstream ifs(filename);
   
@@ -56,19 +55,18 @@ int eval_from_file(std::string filename){
     return EXIT_FAILURE;
   }
   
-  return eval_from_stream(ifs);
+  return eval_from_stream(ifs, interp);
 }
 
-int eval_from_command(std::string argexp){
+int eval_from_command(std::string argexp, Interpreter & interp){
 
   std::istringstream expression(argexp);
 
-  return eval_from_stream(expression);
+  return eval_from_stream(expression, interp);
 }
 
 // A REPL is a repeated read-eval-print loop
-void repl(){
-  Interpreter interp;
+void repl(Interpreter & interp){
     
   while(!std::cin.eof()){
     
@@ -96,19 +94,39 @@ void repl(){
 
 int main(int argc, char *argv[])
 {  
+  Interpreter interp;
+  
+  std::ifstream ifs(STARTUP_FILE);
+  
+  if(!ifs){
+    error("Could not open startup file for reading.");
+  }
+
+  if(!interp.parseStream(ifs)){
+    error("Invalid startup program. Could not parse.");
+  }
+  else{
+    try{
+      interp.evaluate();
+    }
+    catch(const SemanticError & ex){
+      std::cout << "Startup program failed during evaluation" << std::endl;
+    }	
+  }
+
   if(argc == 2){
-    return eval_from_file(argv[1]);
+    return eval_from_file(argv[1], interp);
   }
   else if(argc == 3){
     if(std::string(argv[1]) == "-e"){
-      return eval_from_command(argv[2]);
+      return eval_from_command(argv[2], interp);
     }
     else{
       error("Incorrect number of command line arguments.");
     }
   }
   else{
-    repl();
+    repl(interp);
   }
     
   return EXIT_SUCCESS;

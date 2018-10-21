@@ -359,7 +359,12 @@ Expression Expression::eval(Environment & env){
         }
 
         // evaluate lambda procedure with passed paramter values
-        return proc.eval(shadow);
+        Expression result = proc.eval(shadow);
+
+        // copy over properties from overall lambda to result if any
+        if (!env.get_exp(m_head).propmap.empty()) result.propmap = env.get_exp(m_head).propmap;
+
+        return result;
       }
       else {
         throw SemanticError("Error in call to lambda procedure: invalid number of arguments");
