@@ -79,7 +79,13 @@ void OutputWidget::handle_text(Expression & exp) {
     int x = pos_prop.tailConstBegin()->head().asNumber();
     int y = (pos_prop.tailConstEnd() - 1)->head().asNumber();
 
-    text = scene->addText(exp.head().asSymbol().c_str());
+    std::string str = exp.head().asSymbol();
+
+    // remove quotations at beginning and end
+    str.replace(str.begin(), str.begin() + 1, "");
+    str.replace(str.end() - 1, str.end(), "");
+
+    text = scene->addText(str.c_str());
     text->setPos(x, y);
   }
   else scene->addText("Error: Invalid position property");
