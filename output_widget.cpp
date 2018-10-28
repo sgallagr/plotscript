@@ -4,6 +4,7 @@
 #include <QGraphicsView>
 #include <QGraphicsTextItem>
 #include <fstream>
+#include <QGridLayout>
 
 #include "semantic_error.hpp"
 #include "startup_config.hpp"
@@ -12,6 +13,11 @@ OutputWidget::OutputWidget(QWidget * parent): QWidget(parent){
   
   scene = new QGraphicsScene;
   view = new QGraphicsView(scene);
+
+  auto layout = new QGridLayout;
+  layout->addWidget(view, 0, 0);
+
+  setLayout(layout);
 
 }
 
