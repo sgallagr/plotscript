@@ -13,7 +13,7 @@ Q_OBJECT
 
 public:
 
-  OutputWidget();
+  OutputWidget(QWidget * parent = nullptr);
 
   QWidget * get_view();
 

@@ -7,8 +7,8 @@
 
 NotebookApp::NotebookApp() {
   
-  InputWidget *input = new InputWidget;
-  OutputWidget *output = new OutputWidget;
+  InputWidget *input = new InputWidget(this);
+  OutputWidget *output = new OutputWidget(this);
 
   QVBoxLayout *layout = new QVBoxLayout;
   layout->addWidget(input);

@@ -83,6 +83,18 @@ public:
 
   /// equality comparison for two expressions (recursive)
   bool operator==(const Expression & exp) const noexcept;
+
+  /*! Add a mapping from sym argument to the exp argument for the current expression.
+    \param sym the symbol to add
+    \param exp the expression the symbol should map to
+   */
+  void set_property(const Atom &sym, const Expression &exp);
+
+  /*! Get the Expression the argument symbol maps to.
+    \param sym the symbol to lookup
+    \return the expression the symbol maps to or throw error for no property list
+  */
+  Expression get_property(const Atom &sym) const;
   
 private:
 
@@ -103,18 +115,6 @@ private:
   Expression handle_lambda(Environment & env);
   Expression handle_set_property(Environment & env);
   Expression handle_get_property(Environment & env);
-
-  /*! Add a mapping from sym argument to the exp argument for the current expression.
-    \param sym the symbol to add
-    \param exp the expression the symbol should map to
-   */
-  void set_property(const Atom &sym, const Expression &exp);
-
-  /*! Get the Expression the argument symbol maps to.
-    \param sym the symbol to lookup
-    \return the expression the symbol maps to or throw error for no property list
-  */
-  Expression get_property(const Atom &sym) const;
 
   // the property map
   std::map<std::string, Expression> propmap;

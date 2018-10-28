@@ -9,7 +9,7 @@ Q_OBJECT
 
 public:
 
-  InputWidget();
+  InputWidget(QWidget * parent = nullptr);
 
   void keyPressEvent(QKeyEvent * event);
 
