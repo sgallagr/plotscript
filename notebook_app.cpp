@@ -7,8 +7,8 @@
 
 NotebookApp::NotebookApp() {
   
-  InputWidget *input = new InputWidget(this);
-  OutputWidget *output = new OutputWidget(this);
+  auto input = new InputWidget(this);
+  auto output = new OutputWidget(this);
 
   input->setObjectName("input");
   output->setObjectName("output");

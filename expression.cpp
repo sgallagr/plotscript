@@ -20,10 +20,8 @@ Expression::Expression(const Expression & a){
     m_tail.push_back(e);
   }
 
-  // carry over properties if any
-  if (!a.propmap.empty()) {
-    propmap = a.propmap;
-  }
+  // carry over properties
+  propmap = a.propmap;
 }
 
 Expression & Expression::operator=(const Expression & a){
@@ -36,10 +34,8 @@ Expression & Expression::operator=(const Expression & a){
       m_tail.push_back(e);
     } 
 
-    // carry over properties if any
-    if (!a.propmap.empty()) {
-      propmap = a.propmap;
-    }
+    // carry over properties
+    propmap = a.propmap;
   }
   
   return *this;
@@ -294,7 +290,7 @@ Expression Expression::handle_get_property(Environment & env){
   }
 
   if (!env.is_exp(m_tail[1].head())) {
-    throw SemanticError("Error during evaluation: first argument to get-property not an expression");
+    throw SemanticError("Error during evaluation: second argument to get-property not an expression");
   }
 
   Expression result = env.get_exp(m_tail[1].head()).get_property(m_tail[0].head());
