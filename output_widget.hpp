@@ -15,7 +15,12 @@ public:
 
   OutputWidget(QWidget * parent = nullptr);
 
-  QWidget * get_view();
+  void startup();
+
+  void process(Expression e);
+  void handle_point(Expression & exp);
+  void handle_line(Expression & exp);
+  void handle_text(Expression & exp);
 
 public slots:
 
@@ -25,6 +30,8 @@ private:
 
   QGraphicsScene * scene;
 	QGraphicsView * view;
+  Expression e;
+  Interpreter interp;
 
 };
 
