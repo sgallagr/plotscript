@@ -9,5 +9,5 @@
   
   (define make-text (lambda (str) (str)))
   (define make-text (set-property "object-name" "text" make-text))
-  (define make-text (set-property "position" (list 0 0) make-text))
+  (define make-text (set-property "position" (make-point 0 0) make-text))
 )
