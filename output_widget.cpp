@@ -4,10 +4,9 @@
 #include <QGraphicsView>
 #include <QGraphicsTextItem>
 
-#include "interpreter.hpp"
 #include "semantic_error.hpp"
 
-OutputWidget::OutputWidget(QWidget * parent): QWidget(parent){
+OutputWidget::OutputWidget() {
   
   scene = new QGraphicsScene;
   view = new QGraphicsView(scene);
@@ -19,7 +18,6 @@ QWidget * OutputWidget::get_view(){
 }
 
 void OutputWidget::eval(std::string s) {
-  Interpreter interp;
   std::istringstream expression(s);
   std::stringstream result;
 
@@ -32,7 +30,9 @@ void OutputWidget::eval(std::string s) {
     try{
       Expression exp = interp.evaluate();
       result << exp;
-		  scene->addText(result.str().c_str());
+      if (!exp.isLambda()) {
+		    scene->addText(result.str().c_str());
+      }
     }
     catch(const SemanticError & ex){
 		  scene->addText(ex.what());

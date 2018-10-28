@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "interpreter.hpp"
+
 class QGraphicsView;
 class QGraphicsScene;
 
@@ -11,7 +13,7 @@ Q_OBJECT
 
 public:
 
-  OutputWidget(QWidget * parent = nullptr);
+  OutputWidget();
 
   QWidget * get_view();
 
@@ -24,7 +26,7 @@ private:
   QGraphicsScene * scene;
 	QGraphicsView * view;
 
-  
+  Interpreter interp;
 };
 
 #endif

@@ -5,10 +5,10 @@
 
 #include <QVBoxLayout>
 
-NotebookApp::NotebookApp(QWidget * parent): QWidget(parent){
+NotebookApp::NotebookApp() {
   
-  InputWidget *input = new InputWidget(parent);
-  OutputWidget *output = new OutputWidget(parent);
+  InputWidget *input = new InputWidget;
+  OutputWidget *output = new OutputWidget;
 
   QVBoxLayout *layout = new QVBoxLayout;
   layout->addWidget(input);

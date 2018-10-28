@@ -8,9 +8,8 @@ Q_OBJECT
 
 public:
 
-  NotebookApp(QWidget * parent = nullptr);
-
-  
+  NotebookApp();
+ 
 };
 
 #endif

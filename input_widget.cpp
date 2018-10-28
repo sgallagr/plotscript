@@ -1,6 +1,6 @@
 #include "input_widget.hpp"
 
-InputWidget::InputWidget(QWidget * parent): QPlainTextEdit(parent){}
+InputWidget::InputWidget() {}
 
 void InputWidget::keyPressEvent(QKeyEvent * event) {
 
