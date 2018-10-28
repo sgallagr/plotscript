@@ -26,7 +26,6 @@ private:
   QGraphicsScene * scene;
 	QGraphicsView * view;
 
-  Interpreter interp;
 };
 
 #endif

@@ -242,8 +242,7 @@ void Expression::set_property(const Atom & sym, const Expression & exp){
   if(propmap.find(sym.asSymbol()) != propmap.end()){
     propmap[sym.asSymbol()] = exp;
   }
-
-  propmap.emplace(sym.asSymbol(),exp); 
+  else propmap.emplace(sym.asSymbol(),exp); 
 }
 
 Expression Expression::get_property(const Atom & sym) const{
