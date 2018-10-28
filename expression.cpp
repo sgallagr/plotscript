@@ -278,6 +278,7 @@ Expression Expression::handle_set_property(Environment & env){
 }
 
 Expression Expression::handle_get_property(Environment & env){
+  Expression result;
 
   // tail must have size 2 or error
   if(m_tail.size() != 2){
@@ -289,12 +290,13 @@ Expression Expression::handle_get_property(Environment & env){
     throw SemanticError("Error during evaluation: first argument to get-property not a string");
   }
 
-  if (!env.is_exp(m_tail[1].head())) {
-    throw SemanticError("Error during evaluation: second argument to get-property not an expression");
+  if(env.is_exp(m_tail[1].head())){
+    result = env.get_exp(m_tail[1].head()).get_property(m_tail[0].head());
   }
-
-  Expression result = env.get_exp(m_tail[1].head()).get_property(m_tail[0].head());
-
+  else {
+    result = m_tail[1].get_property(m_tail[0].head());
+  }
+ 
   return result;
 }
 
