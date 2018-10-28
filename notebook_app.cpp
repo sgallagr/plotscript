@@ -15,7 +15,7 @@ NotebookApp::NotebookApp() {
 
   QVBoxLayout *layout = new QVBoxLayout;
   layout->addWidget(input);
-  layout->addWidget(output->get_view());
+  layout->addWidget(output);
   
   setLayout(layout);
 
