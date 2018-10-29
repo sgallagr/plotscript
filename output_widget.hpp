@@ -22,15 +22,15 @@ public:
   void handle_line(Expression & exp);
   void handle_text(Expression & exp);
 
+  QGraphicsScene * scene;
+	QGraphicsView * view;
+
 public slots:
 
   void eval(std::string s);
 
 private:
 
-  QGraphicsScene * scene;
-	QGraphicsView * view;
-  Expression e;
   Interpreter interp;
 
 };
