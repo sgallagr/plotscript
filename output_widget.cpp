@@ -44,11 +44,11 @@ void OutputWidget::startup() {
 }
 
 void OutputWidget::handle_point(Expression & exp) {
-  int x = exp.tailConstBegin()->head().asNumber();
-  int y = (exp.tailConstEnd() - 1)->head().asNumber();
-  int radius =  exp.get_property(Atom("\"size\"")).head().asNumber() / 2;
+  double x = exp.tailConstBegin()->head().asNumber();
+  double y = (exp.tailConstEnd() - 1)->head().asNumber();
+  double radius =  exp.get_property(Atom("\"size\"")).head().asNumber() / 2;
 
-  if (!(radius < 0)){
+  if (!(radius < 0.)){
     QGraphicsEllipseItem * point = scene->addEllipse(x, y, radius, radius);
     point->setBrush(Qt::black);
   }
@@ -56,13 +56,13 @@ void OutputWidget::handle_point(Expression & exp) {
 }
 
 void OutputWidget::handle_line(Expression & exp) {
-  int x1 = exp.tailConstBegin()->tailConstBegin()->head().asNumber();
-  int y1 = (exp.tailConstBegin()->tailConstEnd() - 1)->head().asNumber();
-  int x2 = (exp.tailConstEnd() - 1)->tailConstBegin()->head().asNumber();
-  int y2 = ((exp.tailConstEnd() - 1)->tailConstEnd() - 1)->head().asNumber();
-  int width =  exp.get_property(Atom("\"thickness\"")).head().asNumber();
+  double x1 = exp.tailConstBegin()->tailConstBegin()->head().asNumber();
+  double y1 = (exp.tailConstBegin()->tailConstEnd() - 1)->head().asNumber();
+  double x2 = (exp.tailConstEnd() - 1)->tailConstBegin()->head().asNumber();
+  double y2 = ((exp.tailConstEnd() - 1)->tailConstEnd() - 1)->head().asNumber();
+  double width =  exp.get_property(Atom("\"thickness\"")).head().asNumber();
 
-  if (!(width < 0)){
+  if (!(width < 0.)){
     QGraphicsLineItem * line = scene->addLine(x1, y1, x2, y2);
     QPen pen;
     pen.setWidth(width);
@@ -76,8 +76,8 @@ void OutputWidget::handle_text(Expression & exp) {
   QGraphicsTextItem * text;
 
   if (pos_prop.get_property(Atom("\"object-name\"")) == Expression(Atom("\"point\""))){
-    int x = pos_prop.tailConstBegin()->head().asNumber();
-    int y = (pos_prop.tailConstEnd() - 1)->head().asNumber();
+    double x = pos_prop.tailConstBegin()->head().asNumber();
+    double y = (pos_prop.tailConstEnd() - 1)->head().asNumber();
 
     std::string str = exp.head().asSymbol();
 
