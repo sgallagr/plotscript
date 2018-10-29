@@ -20,6 +20,9 @@ private slots:
   void testExponential();
   void testDefineText();
   void testLambdaNoOutput();
+  void testMakeZeroPoint();
+  void testMakePoint();
+  void testMultiplePoint();
 
 private:
 
@@ -119,6 +122,60 @@ void NotebookTest::testLambdaNoOutput() {
 
   QVERIFY2(itemList.size() == 0, "Output present for user-defined function");
 
+}
+
+void NotebookTest::testMakeZeroPoint() {
+
+  auto in = notebook.findChild<InputWidget *>();
+  auto out = notebook.findChild<OutputWidget *>();
+
+  in->clear();
+
+  QTest::keyClicks(in, "(make-point 0 0)");
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  auto itemList = out->scene->items();
+  auto item = dynamic_cast<QGraphicsEllipseItem *>(itemList.front());
+
+  QVERIFY2(item->rect() == QRectF(0, 0, 0, 0), "Point is not as expected");
+
+}
+
+void NotebookTest::testMakePoint() {
+
+  auto in = notebook.findChild<InputWidget *>();
+  auto out = notebook.findChild<OutputWidget *>();
+
+  in->clear();
+
+  QTest::keyClicks(in, "(set-property \"size\" 20 (make-point 0 0))");
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  auto itemList = out->scene->items();
+  auto item = dynamic_cast<QGraphicsEllipseItem *>(itemList.front());
+
+  QVERIFY2(item->rect() == QRectF(-10, -10, 20, 20), "Point is not as expected");
+
+}
+
+void NotebookTest::testMultiplePoint() {
+
+  auto in = notebook.findChild<InputWidget *>();
+  auto out = notebook.findChild<OutputWidget *>();
+
+  in->clear();
+
+  QTest::keyClicks(in, "(list (set-property \"size\" 14 (make-point 7 9))\
+                        (set-property \"size\" 5 (make-point 3 2)))");
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  auto itemList = out->scene->items();
+  auto firstPoint = dynamic_cast<QGraphicsEllipseItem *>(itemList[1]);
+  auto secondPoint = dynamic_cast<QGraphicsEllipseItem *>(itemList[0]);
+
+  QVERIFY2(firstPoint->rect() == QRectF(0, 2, 14, 14), "First point is not as expected");
+  QVERIFY2(secondPoint->rect() == QRectF(0.5, -0.5, 5, 5), "Second point is not as expected");
+  
 }
 
 QTEST_MAIN(NotebookTest)
