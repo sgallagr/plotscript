@@ -50,7 +50,7 @@ void OutputWidget::handle_point(Expression & exp) {
   double radius = diameter / 2;
 
   double x_center = x - radius;
-  double y_center = y - radius;
+  double y_center = y + radius;
   double width = diameter;
   double height = diameter;
 
