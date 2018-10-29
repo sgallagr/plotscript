@@ -49,8 +49,13 @@ void OutputWidget::handle_point(Expression & exp) {
   double diameter =  exp.get_property(Atom("\"size\"")).head().asNumber();
   double radius = diameter / 2;
 
+  double x_center = x - radius;
+  double y_center = y - radius;
+  double width = diameter;
+  double height = diameter;
+
   if (!(diameter < 0.)){
-    QGraphicsEllipseItem * point = scene->addEllipse(x - radius, y - radius, diameter, diameter);
+    QGraphicsEllipseItem * point = scene->addEllipse(x_center, y_center, width, height);
     point->setBrush(Qt::black);
   }
   else scene->addText("Error: Point size is not a positive number.");
