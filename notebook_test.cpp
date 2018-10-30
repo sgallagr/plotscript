@@ -34,22 +34,22 @@ private:
 
   NotebookApp notebook;
 
+  InputWidget * in = nullptr;
+  OutputWidget * out = nullptr;
+
 };
 
 void NotebookTest::initTestCase(){
 
-  auto in = notebook.findChild<InputWidget *>();
+  in = notebook.findChild<InputWidget *>();
   QVERIFY2(in, "Could not find input widget");
 
-  auto out = notebook.findChild<OutputWidget *>();
+  out = notebook.findChild<OutputWidget *>();
   QVERIFY2(out, "Could not find output widget");
 
 }
 
 void NotebookTest::testNoneProperty() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -65,9 +65,6 @@ void NotebookTest::testNoneProperty() {
 
 void NotebookTest::testCosine() {
 
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
-
   in->clear();
 
   QTest::keyClicks(in, "(cos pi)");
@@ -81,9 +78,6 @@ void NotebookTest::testCosine() {
 }
 
 void NotebookTest::testExponential() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -99,9 +93,6 @@ void NotebookTest::testExponential() {
 
 void NotebookTest::testDefineText() {
 
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
-
   in->clear();
 
   QTest::keyClicks(in, "(begin (define title \"The Title\") (title))");
@@ -116,9 +107,6 @@ void NotebookTest::testDefineText() {
 
 void NotebookTest::testLambdaNoOutput() {
 
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
-
   in->clear();
 
   QTest::keyClicks(in, "(define inc (lambda (x) (+ x 1)))");
@@ -126,14 +114,11 @@ void NotebookTest::testLambdaNoOutput() {
 
   auto itemList = out->scene->items();
 
-  QVERIFY2(itemList.size() == 0, "Output present for user-defined function");
+  QCOMPARE(itemList.size(), 0);
 
 }
 
 void NotebookTest::testMakeZeroPoint() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -143,14 +128,11 @@ void NotebookTest::testMakeZeroPoint() {
   auto itemList = out->scene->items();
   auto item = dynamic_cast<QGraphicsEllipseItem *>(itemList.front());
 
-  QVERIFY2(item->rect() == QRectF(0, 0, 0, 0), "Point is not as expected");
+  QCOMPARE(item->rect(), QRectF(0, 0, 0, 0));
 
 }
 
 void NotebookTest::testMakePoint() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -160,14 +142,11 @@ void NotebookTest::testMakePoint() {
   auto itemList = out->scene->items();
   auto item = dynamic_cast<QGraphicsEllipseItem *>(itemList.front());
 
-  QVERIFY2(item->rect() == QRectF(-10, -10, 20, 20), "Point is not as expected");
+  QCOMPARE(item->rect(), QRectF(-10, -10, 20, 20));
 
 }
 
 void NotebookTest::testMultiplePoint() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -179,15 +158,12 @@ void NotebookTest::testMultiplePoint() {
   auto firstPoint = dynamic_cast<QGraphicsEllipseItem *>(itemList[1]);
   auto secondPoint = dynamic_cast<QGraphicsEllipseItem *>(itemList[0]);
 
-  QVERIFY2(firstPoint->rect() == QRectF(0, 2, 14, 14), "First point is not as expected");
-  QVERIFY2(secondPoint->rect() == QRectF(0.5, -0.5, 5, 5), "Second point is not as expected");
+  QCOMPARE(firstPoint->rect(), QRectF(0, 2, 14, 14));
+  QCOMPARE(secondPoint->rect(), QRectF(0.5, -0.5, 5, 5));
   
 }
 
 void NotebookTest::testMakeLine() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -198,15 +174,12 @@ void NotebookTest::testMakeLine() {
   auto itemList = out->scene->items();
   auto item = dynamic_cast<QGraphicsLineItem *>(itemList.front());
 
-  QVERIFY2(item->line() == QLineF(0, 0, 20, 20), "Line coordinates are not as expected");
-  QVERIFY2(item->pen().width() == 4, "Line thickness is not as expected");
+  QCOMPARE(item->line(), QLineF(0, 0, 20, 20));
+  QCOMPARE(item->pen().width(), 4);
   
 }
 
 void NotebookTest::testMultipleLine() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -234,9 +207,6 @@ void NotebookTest::testMultipleLine() {
 
 void NotebookTest::testMakeText() {
 
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
-
   in->clear();
 
   QTest::keyClicks(in, "(make-text \"Hello World!\")");
@@ -250,9 +220,6 @@ void NotebookTest::testMakeText() {
 }
 
 void NotebookTest::testMultipleText() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
@@ -291,9 +258,6 @@ void NotebookTest::testMultipleText() {
 
 void NotebookTest::testInvalidExpression() {
 
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
-
   in->clear();
 
   QTest::keyClicks(in, "(begin))");
@@ -307,9 +271,6 @@ void NotebookTest::testInvalidExpression() {
 }
 
 void NotebookTest::testSemanticError() {
-
-  auto in = notebook.findChild<InputWidget *>();
-  auto out = notebook.findChild<OutputWidget *>();
 
   in->clear();
 
