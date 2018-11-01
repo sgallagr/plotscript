@@ -173,7 +173,8 @@ Expression Expression::handle_define(Environment & env){
     throw SemanticError("Error during evaluation: attempt to redefine a special-form");
   }
   
-  if(env.is_proc(m_head)){
+  if(env.is_proc(m_tail[0].head()) || m_tail[0].head().asSymbol() == "apply" || m_tail[0].head().asSymbol() == "map"
+    ||  m_tail[0].head().asSymbol() == "set-property" ||  m_tail[0].head().asSymbol() == "get-property"){
     throw SemanticError("Error during evaluation: attempt to redefine a built-in procedure");
   }
   

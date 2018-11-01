@@ -388,6 +388,9 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
              "(append 1)",
              "(join 1)",
              "(range 1)",
+             "(set-property \"test\")",
+             "(lambda (x))",
+             "(get-property \"test\")",
              "(+ 1 (list 1 2 3))", // invalid argument
              "(* 1 (list 1 2 3))",
              "(- 1 (list 1 2 3))",
@@ -416,7 +419,14 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
              "(apply + 3)",
              "(map 3 (list 1 2 3))",
              "(map + 3)",
+             "(begin)",
+             "(set-property 1 2 3)",
+             "(lambda (a 2 3) (+ 1 2 3 4 5))",
+             "(get-property 1 2)",
+             "(apply x 2)",
+             "(& 1 2)",
              "(define begin 1)", // redefine special form
+             "(define map 1)",   // redefine built-in procedure
              "(- 1 1 2)", // too many arguments
              "(/ 1 2 3)",
              "(sqrt 1 2)",
@@ -588,4 +598,42 @@ TEST_CASE( "Test using number as procedure", "[interpreter]" ) {
   REQUIRE(ok == true);
   
   REQUIRE_THROWS_AS(interp.evaluate(), SemanticError);
+}
+
+TEST_CASE("Test set and get-property procdedures", "[interpreter]") {
+  Expression result;
+  Interpreter interp;
+
+  std::string program;
+
+  INFO("trying set-property")
+  program = "(define x (set-property \"test\" 1 (+ 1 2)))";
+
+  std::istringstream iss(program);
+ 
+  bool ok = interp.parseStream(iss);
+  if(!ok){
+    std::cerr << "Failed to parse: " << program << std::endl; 
+  }
+  REQUIRE(ok == true);
+
+  REQUIRE_NOTHROW(interp.evaluate());
+
+
+  INFO("trying get-property")
+  program = "(get-property \"test\" x)";
+
+  iss.clear();
+  iss.str(program);
+    
+  ok = interp.parseStream(iss);
+  if(!ok){
+    std::cerr << "Failed to parse: " << program << std::endl; 
+  }
+  REQUIRE(ok == true);
+
+  REQUIRE_NOTHROW(result = interp.evaluate());
+
+  REQUIRE(Expression(result) == Expression(1));
+
 }
