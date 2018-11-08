@@ -93,6 +93,11 @@ void OutputWidget::handle_text(Expression & exp) {
 
     text = scene->addText(str.c_str());
     text->setPos(x, y);
+
+    QFont font("Courier");
+    font.setStyleHint(QFont::Courier);
+    
+    text->setFont(font);
   }
   else scene->addText("Error: Invalid position property");
 }
