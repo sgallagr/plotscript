@@ -9,8 +9,8 @@
 #include "semantic_error.hpp"
 #include "startup_config.hpp"
 
-OutputWidget::OutputWidget(QWidget * parent): QWidget(parent){
-  
+OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
+
   scene = new QGraphicsScene;
   view = new QGraphicsView(scene);
 
@@ -21,32 +21,32 @@ OutputWidget::OutputWidget(QWidget * parent): QWidget(parent){
 
   startup();
 
-}
+  }
 
 void OutputWidget::startup() {
   std::ifstream ifs(STARTUP_FILE);
 
-  if(!ifs){
+  if (!ifs) {
     scene->addText("Could not open startup file for reading.");
-  }
-
-  if(!interp.parseStream(ifs)){
-    scene->addText("Invalid startup program. Could not parse.");
-  }
-  else{
-    try{
-      interp.evaluate();
     }
-    catch(const SemanticError & ex){
+
+  if (!interp.parseStream(ifs)) {
+    scene->addText("Invalid startup program. Could not parse.");
+    }
+  else {
+    try {
+      interp.evaluate();
+      }
+    catch (const SemanticError & ex) {
       scene->addText("Startup program failed during evaluation");
-    }	
+      }
+    }
   }
-}
 
 void OutputWidget::handle_point(Expression & exp) {
   double x = exp.tailConstBegin()->head().asNumber();
   double y = (exp.tailConstEnd() - 1)->head().asNumber();
-  double diameter =  exp.get_property(Atom("\"size\"")).head().asNumber();
+  double diameter = exp.get_property(Atom("\"size\"")).head().asNumber();
   double radius = diameter / 2;
 
   double x_center = x - radius;
@@ -54,34 +54,34 @@ void OutputWidget::handle_point(Expression & exp) {
   double width = diameter;
   double height = diameter;
 
-  if (!(diameter < 0.)){
+  if (!(diameter < 0.)) {
     QGraphicsEllipseItem * point = scene->addEllipse(x_center, y_center, width, height);
     point->setBrush(Qt::black);
-  }
+    }
   else scene->addText("Error: Point size is not a positive number.");
-}
+  }
 
 void OutputWidget::handle_line(Expression & exp) {
   double x1 = exp.tailConstBegin()->tailConstBegin()->head().asNumber();
   double y1 = (exp.tailConstBegin()->tailConstEnd() - 1)->head().asNumber();
   double x2 = (exp.tailConstEnd() - 1)->tailConstBegin()->head().asNumber();
   double y2 = ((exp.tailConstEnd() - 1)->tailConstEnd() - 1)->head().asNumber();
-  double width =  exp.get_property(Atom("\"thickness\"")).head().asNumber();
+  double width = exp.get_property(Atom("\"thickness\"")).head().asNumber();
 
-  if (!(width < 0.)){
+  if (!(width < 0.)) {
     QGraphicsLineItem * line = scene->addLine(x1, y1, x2, y2);
     QPen pen;
     pen.setWidth(width);
     line->setPen(pen);
-  }
+    }
   else scene->addText("Error: Line thickness is not a positive number.");
-}
+  }
 
 void OutputWidget::handle_text(Expression & exp) {
   Expression pos_prop = exp.get_property(Atom("\"position\""));
   QGraphicsTextItem * text;
 
-  if (pos_prop.get_property(Atom("\"object-name\"")) == Expression(Atom("\"point\""))){
+  if (pos_prop.get_property(Atom("\"object-name\"")) == Expression(Atom("\"point\""))) {
     double x = pos_prop.tailConstBegin()->head().asNumber();
     double y = (pos_prop.tailConstEnd() - 1)->head().asNumber();
 
@@ -96,6 +96,13 @@ void OutputWidget::handle_text(Expression & exp) {
 
     QFont font("Courier");
     font.setStyleHint(QFont::Courier);
+
+    if (exp.get_property(Atom("\"text-scale\"")).head().isNumber()){
+      font.setPointSize(exp.get_property(Atom("\"text-scale\"")).head().asNumber());
+    }
+    else {
+      font.setPointSize(1);
+    }
     
     text->setFont(font);
   }
