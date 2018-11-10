@@ -643,6 +643,144 @@ Expression range(const std::vector<Expression> & args) {
   return result;
 };
 
+Expression discrete_plot(const std::vector<Expression> & args){
+
+  Expression result;
+
+  double x_min, y_min, x_max, y_max, x_val, y_val;
+  
+  Expression resetLine(Atom("list")), line, left_bound, right_bound, upper_bound, lower_bound, ordinate_cross, abscissa_cross;
+  resetLine.set_property(Atom("object-name"), Expression(Atom("line")));
+  left_bound = right_bound = upper_bound = lower_bound = ordinate_cross = abscissa_cross = line = resetLine;
+
+  Expression resetPoint(Atom("list")), point, pointA, pointB;
+  resetPoint.set_property(Atom("object-name"), Expression(Atom("point")));
+  pointA = pointB = point = resetPoint;
+
+  Expression lines(Atom("list"));
+  Expression points(Atom("list"));
+  Expression text;
+
+  // check if all arguments are valid while adding to list
+  for (auto & a : args) {
+    if (a.isHeadNumber() || a.isHeadComplex() || a.isList() || a.isStringLit()) {
+      result.append(a);
+    }
+    else {
+      throw SemanticError("Error in call to build list: invalid argument");
+    }
+  }
+
+  // Determine max and min x and y values for plot
+  x_min = x_max = result.tailConstBegin()->tailConstBegin()->tailConstBegin()->head().asNumber();
+  y_min = y_max = (result.tailConstBegin()->tailConstBegin()->tailConstEnd() - 1)->head().asNumber();
+
+  for(auto it = result.tailConstBegin()->tailConstBegin(); it != result.tailConstBegin()->tailConstEnd(); ++it){
+    x_val = it->tailConstBegin()->head().asNumber();
+    y_val = (it->tailConstEnd() - 1)->head().asNumber();
+    
+    if (x_min > x_val) x_min = x_val;
+    else if (x_max < x_val) x_max = x_val;
+     
+    if (y_min > y_val) y_min = y_val;
+    else if (y_max < y_val) y_max = y_val; 
+  }
+
+  // Create all lines necessary for plot
+
+  // make left bound line
+  pointA.append(x_min);
+  pointA.append(y_max);
+  left_bound.append(pointA);
+  pointB.append(x_min);
+  pointB.append(y_min);
+  left_bound.append(pointB);
+  lines.append(left_bound);
+  pointA = pointB = resetPoint;
+
+  // make right bound line
+  pointA.append(x_max);
+  pointA.append(y_max);
+  right_bound.append(pointB);
+  pointB.append(x_max);
+  pointB.append(y_min);
+  right_bound.append(pointB);
+  lines.append(right_bound);
+  pointA = pointB = resetPoint;
+
+  // make upper bound line
+  pointA.append(x_min);
+  pointA.append(y_max);
+  upper_bound.append(pointA);
+  pointB.append(x_max);
+  pointB.append(y_max);
+  upper_bound.append(pointB);
+  lines.append(upper_bound);
+  pointA = pointB = resetPoint;
+
+  // make lower bound line
+  pointA.append(x_min);
+  pointA.append(y_min);
+  lower_bound.append(point);
+  pointB.append(x_max);
+  pointB.append(y_min);
+  lower_bound.append(pointB);
+  lines.append(lower_bound);
+  pointA = pointB = resetPoint;
+
+  // make ordinate cross line
+  pointA.append(0);
+  pointA.append(y_max);
+  ordinate_cross.append(pointA);
+  pointB.append(0);
+  pointB.append(y_min);
+  ordinate_cross.append(pointB);
+  lines.append(ordinate_cross);
+  pointA = pointB = resetPoint;
+
+  // make abscissa cross line
+  pointA.append(x_min);
+  pointA.append(0);
+  abscissa_cross.append(pointA);
+  pointB.append(x_max);
+  pointB.append(0);
+  abscissa_cross.append(pointB);
+  lines.append(abscissa_cross);
+
+  // Organize required points and lines for plot
+  for(auto it = result.tailConstBegin()->tailConstBegin(); it != result.tailConstBegin()->tailConstEnd(); ++it){
+    x_val = it->tailConstBegin()->head().asNumber();
+    y_val = (it->tailConstEnd() - 1)->head().asNumber();
+
+    pointA = pointB = point = resetPoint;
+    line = resetLine;
+
+    point.append(x_val);
+    point.append(y_val);
+    points.append(point);
+
+    pointA.append(x_val);
+    pointA.append(0);
+    pointB.append(x_val);
+    pointB.append(y_val);
+    line.append(pointA);
+    line.append(pointB);
+
+    lines.append(line);
+  }
+
+  text.append(*(result.tailConstEnd() - 1));
+
+  result = Expression(Atom("list"));
+  result.set_property(Atom("discrete-plot"), Expression(Atom("true")));
+
+  result.append(points);
+  result.append(lines);
+  result.append(text);
+  
+  return result;
+};
+
 const double PI = std::atan2(0, -1);
 const double EXP = std::exp(1);
 const std::complex<double> I(0,1);
@@ -794,4 +932,7 @@ void Environment::reset(){
 
   // Procedure: range;
   envmap.emplace("range", EnvResult(ProcedureType, range));
+
+  // Procedure: discrete-plot;
+  envmap.emplace("discrete-plot", EnvResult(ProcedureType, discrete_plot));
 }
