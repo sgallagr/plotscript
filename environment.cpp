@@ -663,13 +663,19 @@ Expression discrete_plot(const std::vector<Expression> & args){
 
   // check if all arguments are valid while adding to list
   for (auto & a : args) {
-    if (a.isHeadNumber() || a.isHeadComplex() || a.isList() || a.isStringLit()) {
+    if (a.isList() && args[0].tailConstBegin() != args[0].tailConstBegin()) {
       result.append(a);
     }
     else {
-      throw SemanticError("Error in call to build list: invalid argument");
+      throw SemanticError("Error in call to discrete-plot: invalid argument");
     }
   }
+
+  if (args.size() != 2) {
+    throw SemanticError("Error in call to discrete-plot: invalid number of arguments");
+  }
+
+  if (args[0].tailConstBegin() == args[0].tailConstBegin())
 
   // Determine max and min x and y values for plot
   x_min = x_max = result.tailConstBegin()->tailConstBegin()->tailConstBegin()->head().asNumber();
