@@ -399,8 +399,7 @@ Expression Expression::eval(Environment & env){
       // preconditions
       if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || 
           env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
-        if (m_tail[1].isList()) {
-
+       
           // evaluate each argument according to procedure and place in result list
           Atom proc = m_tail[0].head();
           Expression result(Atom("list"));
@@ -409,11 +408,13 @@ Expression Expression::eval(Environment & env){
             temp.append(*it);
             result.append(temp.eval(env));
           }
-          return result;
-        }
-        else {
-          throw SemanticError("Error in call to map: second argument not a list");
-        }
+
+          if (result.isList()) {
+            return result;
+          }
+          else {
+            throw SemanticError("Error in call to map: second argument not a list");
+          }
       }
       else {
         throw SemanticError("Error in call to map: first argument not a procedure");
