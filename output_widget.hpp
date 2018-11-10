@@ -18,6 +18,8 @@ public:
 
   void startup();
 
+  void resizeEvent(QResizeEvent * event);
+
   void process(Expression e);
   void handle_point(Expression & exp);
   void handle_line(Expression & exp);

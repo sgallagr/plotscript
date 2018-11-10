@@ -14,6 +14,10 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
   scene = new QGraphicsScene;
   view = new QGraphicsView(scene);
 
+  view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+  view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
   auto layout = new QGridLayout;
   layout->addWidget(view, 0, 0);
 
@@ -21,27 +25,32 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
   startup();
 
-  }
+}
+
+void OutputWidget::resizeEvent(QResizeEvent * event) {
+  this->QWidget::resizeEvent(event);
+  view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+}
 
 void OutputWidget::startup() {
   std::ifstream ifs(STARTUP_FILE);
 
   if (!ifs) {
     scene->addText("Could not open startup file for reading.");
-    }
+  }
 
   if (!interp.parseStream(ifs)) {
     scene->addText("Invalid startup program. Could not parse.");
-    }
+  }
   else {
     try {
       interp.evaluate();
-      }
+    }
     catch (const SemanticError & ex) {
       scene->addText("Startup program failed during evaluation");
-      }
     }
   }
+}
 
 void OutputWidget::handle_point(Expression & exp) {
   double x = exp.tailConstBegin()->head().asNumber();
@@ -57,9 +66,9 @@ void OutputWidget::handle_point(Expression & exp) {
   if (!(diameter < 0.)) {
     QGraphicsEllipseItem * point = scene->addEllipse(x_center, y_center, width, height);
     point->setBrush(Qt::black);
-    }
-  else scene->addText("Error: Point size is not a positive number.");
   }
+  else scene->addText("Error: Point size is not a positive number.");
+ }
 
 void OutputWidget::handle_line(Expression & exp) {
   double x1 = exp.tailConstBegin()->tailConstBegin()->head().asNumber();
@@ -73,7 +82,7 @@ void OutputWidget::handle_line(Expression & exp) {
     QPen pen;
     pen.setWidth(width);
     line->setPen(pen);
-    }
+  }
   else scene->addText("Error: Line thickness is not a positive number.");
 }
 
@@ -148,7 +157,9 @@ void OutputWidget::process(Expression exp) {
     result << exp;
 		scene->addText(result.str().c_str());
   }
-    
+   
+  scene->setSceneRect(scene->itemsBoundingRect());
+  view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
 }
 
 void OutputWidget::eval(std::string s) {
