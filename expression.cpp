@@ -305,34 +305,34 @@ Expression Expression::handle_get_property(Environment & env){
 // this is a simple recursive version. the iterative version is more
 // difficult with the ast data structure used (no parent pointer).
 // this limits the practical depth of our AST
-Expression Expression::eval(Environment & env){
+Expression Expression::eval(Environment & env) {
 
   // lookup only if tail is empty and the head is not list
-  if(m_tail.empty() && m_head.asSymbol() != "list"){
+  if (m_tail.empty() && m_head.asSymbol() != "list") {
     return handle_lookup(m_head, env);
-  }
+    }
   // handle begin special-form
-  else if(m_head.isSymbol() && m_head.asSymbol() == "begin"){
+  else if (m_head.isSymbol() && m_head.asSymbol() == "begin") {
     return handle_begin(env);
-  }
+    }
   // handle define special-form
-  else if(m_head.isSymbol() && m_head.asSymbol() == "define"){
+  else if (m_head.isSymbol() && m_head.asSymbol() == "define") {
     return handle_define(env);
-  }
+    }
   // handle lambda special-form
-  else if(m_head.isSymbol() && m_head.asSymbol() == "lambda"){
+  else if (m_head.isSymbol() && m_head.asSymbol() == "lambda") {
     return handle_lambda(env);
-  }
+    }
   // handle set-property special procedure
   else if (m_head.isSymbol() && m_head.asSymbol() == "set-property") {
     return handle_set_property(env);
-  }
+    }
   // handle get-property special procedure
   else if (m_head.isSymbol() && m_head.asSymbol() == "get-property") {
     return handle_get_property(env);
-  }
+    }
   // else attempt to treat as procedure
-  else{ 
+  else {
     std::vector<Expression> results;
 
     // lambda procedure -----------------------------------------------------------------------------------
@@ -354,7 +354,7 @@ Expression Expression::eval(Environment & env){
           singleparam.append(m_tail[count]);
           singleparam.eval(shadow);
           ++count;
-        }
+          }
 
         // evaluate lambda procedure with passed paramter values
         Expression result = proc.eval(shadow);
@@ -363,58 +363,59 @@ Expression Expression::eval(Environment & env){
         if (!env.get_exp(m_head).propmap.empty()) result.propmap = env.get_exp(m_head).propmap;
 
         return result;
-      }
+        }
       else {
         throw SemanticError("Error in call to lambda procedure: invalid number of arguments");
+        }
       }
-    }
 
     // apply procedure -----------------------------------------------------------------------------------
     else if (m_head.isSymbol() && m_head.asSymbol() == "apply") {
 
       // preconditions
-      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || 
-          env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
+      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) ||
+        env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
         if (m_tail[1].isList()) {
 
           // move procedure and arguments into evaluable expression and evaluate
           Expression result(m_tail[0].head());
           for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
             result.append(*it);
-          }
+            }
           return result.eval(env);
-        }
+          }
         else {
           throw SemanticError("Error in call to apply: second argument not a list");
+          }
         }
-      }
       else {
         throw SemanticError("Error in call to apply: first argument not a procedure");
+        }
       }
-    }
 
     // map procedure -----------------------------------------------------------------------------------
     else if (m_head.isSymbol() && m_head.asSymbol() == "map") {
 
       // preconditions
-      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) || 
-          env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
-       
-          // evaluate each argument according to procedure and place in result list
-          Atom proc = m_tail[0].head();
-          Expression result(Atom("list"));
-          for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
-            Expression temp(proc);
-            temp.append(*it);
-            result.append(temp.eval(env));
-          }
+      if ((env.is_proc(m_tail[0].head()) && (m_tail[0].tailConstBegin() == m_tail[0].tailConstEnd())) ||
+        env.get_exp(m_tail[0].head()).head().asSymbol() == "lambda") {
 
-          if (result.isList()) {
-            return result;
-          }
-          else {
-            throw SemanticError("Error in call to map: second argument not a list");
-          }
+        // evaluate each argument according to procedure and place in result list
+        Atom proc = m_tail[0].head();
+        Expression result(Atom("list"));
+
+        for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
+          Expression temp(proc);
+          temp.append(*it);
+          result.append(temp.eval(env));
+        }
+        
+        if (m_tail[1].isList() || (result.isList() && m_tail[1].tailConstBegin() != m_tail[1].tailConstEnd())) {
+          return result;
+        }
+        else {
+          throw SemanticError("Error in call to map: second argument not a list");
+        }
       }
       else {
         throw SemanticError("Error in call to map: first argument not a procedure");

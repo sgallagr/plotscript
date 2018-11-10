@@ -417,7 +417,6 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
              "(lambda (+) (+ 2 2))",
              "(apply 3 (list 1 2 3))",
              "(apply + 3)",
-             "(map 3 (list 1 2 3))",
              "(map + 3)",
              "(begin)",
              "(set-property 1 2 3)",
