@@ -14,7 +14,6 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
   scene = new QGraphicsScene;
   view = new QGraphicsView(scene);
 
-  view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
   view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -29,7 +28,7 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
 void OutputWidget::resizeEvent(QResizeEvent * event) {
   this->QWidget::resizeEvent(event);
-  view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
 void OutputWidget::startup() {
@@ -157,9 +156,6 @@ void OutputWidget::process(Expression exp) {
     result << exp;
 		scene->addText(result.str().c_str());
   }
-   
-  scene->setSceneRect(scene->itemsBoundingRect());
-  view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
 }
 
 void OutputWidget::eval(std::string s) {
@@ -178,4 +174,6 @@ void OutputWidget::eval(std::string s) {
 		  scene->addText(ex.what());
     }
   }
+
+  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
