@@ -663,7 +663,7 @@ Expression discrete_plot(const std::vector<Expression> & args){
 
   // check if all arguments are valid while adding to list
   for (auto & a : args) {
-    if (a.isList() && args[0].tailConstBegin() != args[0].tailConstBegin()) {
+    if (a.isList() && args[0].tailConstBegin() != args[0].tailConstEnd()) {
       result.append(a);
     }
     else {
