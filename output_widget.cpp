@@ -75,7 +75,14 @@ void OutputWidget::handle_line(Expression & exp) {
     line->setPen(pen);
     }
   else scene->addText("Error: Line thickness is not a positive number.");
-  }
+}
+
+void OutputWidget::center_text(QGraphicsTextItem & text, double x, double y) {
+  double height = text.boundingRect().height();
+  double width = text.boundingRect().width();
+
+  text.setPos(x - (width/2), y - (height/2));
+}
 
 void OutputWidget::handle_text(Expression & exp) {
   Expression pos_prop = exp.get_property(Atom("\"position\""));
@@ -84,6 +91,11 @@ void OutputWidget::handle_text(Expression & exp) {
   if (pos_prop.get_property(Atom("\"object-name\"")) == Expression(Atom("\"point\""))) {
     double x = pos_prop.tailConstBegin()->head().asNumber();
     double y = (pos_prop.tailConstEnd() - 1)->head().asNumber();
+    const double PI = std::atan2(0, -1);
+    double scale_val;
+    double rotate_val;
+
+    QFont font("Courier");
 
     std::string str = exp.head().asSymbol();
 
@@ -92,19 +104,25 @@ void OutputWidget::handle_text(Expression & exp) {
     str.replace(str.end() - 1, str.end(), "");
 
     text = scene->addText(str.c_str());
-    text->setPos(x, y);
-
-    QFont font("Courier");
-    font.setStyleHint(QFont::Courier);
+    center_text(*text, x, y);
+    text->setFont(font);
 
     if (exp.get_property(Atom("\"text-scale\"")).head().isNumber()){
-      font.setPointSize(exp.get_property(Atom("\"text-scale\"")).head().asNumber());
+      scale_val = exp.get_property(Atom("\"text-scale\"")).head().asNumber();
     }
     else {
-      font.setPointSize(1);
+      scale_val = 1;
     }
-    
-    text->setFont(font);
+
+    if (exp.get_property(Atom("\"text-rotation\"")).head().isNumber()){
+      rotate_val = (180/PI) * exp.get_property(Atom("\"text-rotation\"")).head().asNumber();
+    }
+    else {
+      rotate_val = 0;
+    }
+
+    text->setScale(scale_val);
+    text->setRotation(rotate_val);
   }
   else scene->addText("Error: Invalid position property");
 }
