@@ -20,10 +20,9 @@ public:
 
   void resizeEvent(QResizeEvent * event);
 
-  void process(Expression e);
+  void process(Expression exp);
   void handle_point(Expression & exp);
   void handle_line(Expression & exp);
-  void center_text(QGraphicsTextItem & text, double x, double y);
   void handle_text(Expression & exp);
 
   QGraphicsScene * scene;

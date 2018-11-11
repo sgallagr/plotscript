@@ -665,7 +665,6 @@ Expression discrete_plot(const std::vector<Expression> & args){
   Expression text;
 
 
-
   // check if all arguments are valid while adding to list
   for (auto & a : args) {
     if (a.isList() && args[0].tailConstBegin() != args[0].tailConstEnd()) {
@@ -698,68 +697,80 @@ Expression discrete_plot(const std::vector<Expression> & args){
   // Create all lines necessary for plot
 
   // make left bound line
-  pointA.append(x_min);
-  pointA.append(y_max);
+  pointA.append(-10);
+  pointA.append(10);
   left_bound.append(pointA);
-  pointB.append(x_min);
-  pointB.append(y_min);
+  pointB.append(-10);
+  pointB.append(-10);
   left_bound.append(pointB);
   result.append(left_bound);
   pointA = pointB = resetPoint;
 
   // make right bound line
-  pointA.append(x_max);
-  pointA.append(y_max);
+  pointA.append(10);
+  pointA.append(10);
   right_bound.append(pointA);
-  pointB.append(x_max);
-  pointB.append(y_min);
+  pointB.append(10);
+  pointB.append(-10);
   right_bound.append(pointB);
   result.append(right_bound);
   pointA = pointB = resetPoint;
 
   // make upper bound line
-  pointA.append(x_min);
-  pointA.append(y_max);
+  pointA.append(-10);
+  pointA.append(10);
   upper_bound.append(pointA);
-  pointB.append(x_max);
-  pointB.append(y_max);
+  pointB.append(10);
+  pointB.append(10);
   upper_bound.append(pointB);
   result.append(upper_bound);
   pointA = pointB = resetPoint;
 
   // make lower bound line
-  pointA.append(x_min);
-  pointA.append(y_min);
+  pointA.append(-10);
+  pointA.append(-10);
   lower_bound.append(pointA);
-  pointB.append(x_max);
-  pointB.append(y_min);
+  pointB.append(10);
+  pointB.append(-10);
   lower_bound.append(pointB);
   result.append(lower_bound);
   pointA = pointB = resetPoint;
 
   // make ordinate cross line
-  pointA.append(0);
-  pointA.append(y_max);
-  ordinate_cross.append(pointA);
-  pointB.append(0);
-  pointB.append(y_min);
-  ordinate_cross.append(pointB);
-  result.append(ordinate_cross);
-  pointA = pointB = resetPoint;
+  if (x_min < 0) {
+    pointA.append(0);
+    pointA.append(10);
+    ordinate_cross.append(pointA);
+    pointB.append(0);
+    pointB.append(-10);
+    ordinate_cross.append(pointB);
+    result.append(ordinate_cross);
+    pointA = pointB = resetPoint;
+  }
 
   // make abscissa cross line
-  pointA.append(x_min);
-  pointA.append(0);
-  abscissa_cross.append(pointA);
-  pointB.append(x_max);
-  pointB.append(0);
-  abscissa_cross.append(pointB);
-  result.append(abscissa_cross);
+  if (y_min < 0) {
+    pointA.append(-10);
+    pointA.append(0);
+    abscissa_cross.append(pointA);
+    pointB.append(10);
+    pointB.append(0);
+    abscissa_cross.append(pointB);
+    result.append(abscissa_cross);
+  }
 
   // Organize required points and lines for plot
   for(auto it = initial.tailConstBegin()->tailConstBegin(); it != initial.tailConstBegin()->tailConstEnd(); ++it){
     x_val = it->tailConstBegin()->head().asNumber();
     y_val = (it->tailConstEnd() - 1)->head().asNumber();
+
+    // scale
+    if (x_val >= 0) x_val *= (10 / x_max);
+    else x_val *= (10 / std::abs(x_min));
+
+    // y-axis inverted in view
+    if (y_val >= 0) y_val *= (10 / y_max) * -1;
+    else y_val = y_val * (10 / std::abs(y_min)) * -1;
 
     pointA = pointB = point = resetPoint;
     line = resetLine;
@@ -769,7 +780,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
     result.append(point);
 
     pointA.append(x_val);
-    pointA.append(0);
+    if (y_min < 0) pointA.append(0);
+    else pointA.append(10);
     pointB.append(x_val);
     pointB.append(y_val);
     line.append(pointA);
@@ -778,6 +790,7 @@ Expression discrete_plot(const std::vector<Expression> & args){
     result.append(line);
   } 
 
+  
   // Find text scaling value if any
   for(auto it = args[1].tailConstBegin(); it != args[1].tailConstEnd(); ++it){
     if (it->tailConstBegin()->head().asSymbol() == "text-scale") {
@@ -787,13 +800,14 @@ Expression discrete_plot(const std::vector<Expression> & args){
 
   for(auto it = args[1].tailConstBegin(); it != args[1].tailConstEnd(); ++it){
     point = resetPoint;
+    point.set_property(Atom("\"size\""), Expression(Atom(0)));
 
     if (it->tailConstBegin()->head().asSymbol() == "\"title\"") {
       text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-      point.append(Atom((x_max - x_min) / 2));
-      point.append(Atom(y_max + 3));
+      point.append(Atom(0));
+      point.append(Atom(-13));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
     }
@@ -802,8 +816,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-      point.append(Atom((x_max - x_min) / 2));
-      point.append(Atom(y_min - 3));
+      point.append(Atom(0));
+      point.append(Atom(13));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
     }
@@ -812,49 +826,50 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-      text.set_property(Atom("\"text-rotation\""), Expression(Atom(-std::atan2(0, -1))));
-      point.append(Atom(x_min - 3));
-      point.append(Atom((y_max - y_min) / 2));
+      text.set_property(Atom("\"text-rotation\""), Expression(Atom(-std::atan2(0, -1) / 2)));
+      point.append(Atom(-13));
+      point.append(Atom(0));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
     }
   }
 
   point = resetPoint;
-  text = Expression(std::to_string(y_max));
+  text = Expression(Atom("y_max"));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(x_min - 2));
-  point.append(Atom(y_max));
+  point.append(Atom(-12));
+  point.append(Atom(-10));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
 
   point = resetPoint;
-  text = Expression(std::to_string(y_min));
+  text = Expression(Atom("y_min"));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(x_min - 2));
-  point.append(Atom(y_min));
+  point.append(Atom(-12));
+  point.append(Atom(10));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
 
   point = resetPoint;
-  text = Expression(std::to_string(x_max));
+  text = Expression(Atom("x_max"));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(x_max));
-  point.append(Atom(y_min - 2));
+  point.append(Atom(10));
+  point.append(Atom(12));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
 
   point = resetPoint;
-  text = Expression(std::to_string(x_min));
+  text = Expression(Atom("x_min"));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(x_min));
-  point.append(Atom(y_min - 2));
+  point.append(Atom(-10));
+  point.append(Atom(12));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
+  
 
   return result;
 };

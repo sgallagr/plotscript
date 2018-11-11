@@ -65,6 +65,10 @@ void OutputWidget::handle_point(Expression & exp) {
   if (!(diameter < 0.)) {
     QGraphicsEllipseItem * point = scene->addEllipse(x_center, y_center, width, height);
     point->setBrush(Qt::black);
+    QPen pen;
+    pen.setWidth(0);
+    pen.setBrush(Qt::black);
+    point->setPen(pen);
   }
   else scene->addText("Error: Point size is not a positive number.");
  }
@@ -85,13 +89,6 @@ void OutputWidget::handle_line(Expression & exp) {
   else scene->addText("Error: Line thickness is not a positive number.");
 }
 
-void OutputWidget::center_text(QGraphicsTextItem & text, double x, double y) {
-  double height = text.boundingRect().height();
-  double width = text.boundingRect().width();
-
-  text.setPos(x - (width/2), y - (height/2));
-}
-
 void OutputWidget::handle_text(Expression & exp) {
   Expression pos_prop = exp.get_property(Atom("\"position\""));
   QGraphicsTextItem * text;
@@ -99,28 +96,20 @@ void OutputWidget::handle_text(Expression & exp) {
   if (pos_prop.get_property(Atom("\"object-name\"")) == Expression(Atom("\"point\""))) {
     double x = pos_prop.tailConstBegin()->head().asNumber();
     double y = (pos_prop.tailConstEnd() - 1)->head().asNumber();
+    double height, width;
     const double PI = std::atan2(0, -1);
     double scale_val;
     double rotate_val;
 
-    QFont font("Courier");
+    QFont font("Monospace");
+    font.setStyleHint(QFont::TypeWriter);
+    font.setPointSize(1);
 
     std::string str = exp.head().asSymbol();
 
     // remove quotations at beginning and end
     str.replace(str.begin(), str.begin() + 1, "");
     str.replace(str.end() - 1, str.end(), "");
-
-    text = scene->addText(str.c_str());
-    center_text(*text, x, y);
-    text->setFont(font);
-
-    if (exp.get_property(Atom("\"text-scale\"")).head().isNumber()){
-      scale_val = exp.get_property(Atom("\"text-scale\"")).head().asNumber();
-    }
-    else {
-      scale_val = 1;
-    }
 
     if (exp.get_property(Atom("\"text-rotation\"")).head().isNumber()){
       rotate_val = (180/PI) * exp.get_property(Atom("\"text-rotation\"")).head().asNumber();
@@ -129,8 +118,20 @@ void OutputWidget::handle_text(Expression & exp) {
       rotate_val = 0;
     }
 
+    if (exp.get_property(Atom("\"text-scale\"")).head().isNumber()){
+      scale_val = exp.get_property(Atom("\"text-scale\"")).head().asNumber();
+    }
+    else {
+      scale_val = 1;
+    }
+
+    text = scene->addText(str.c_str());
+    text->setFont(font);
     text->setScale(scale_val);
     text->setRotation(rotate_val);
+    height = text->boundingRect().height();
+    width = text->boundingRect().width();
+    text->setPos(x - (width/2), y - (height/2));
   }
   else scene->addText("Error: Invalid position property");
 }
@@ -156,6 +157,8 @@ void OutputWidget::process(Expression exp) {
     result << exp;
 		scene->addText(result.str().c_str());
   }
+
+  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
 void OutputWidget::eval(std::string s) {
