@@ -695,43 +695,49 @@ Expression discrete_plot(const std::vector<Expression> & args){
   }
 
   // Create all lines necessary for plot
+  double right, left, upper, lower;
+
+  right = std::abs(x_max/x_min) * 10;
+  left = std::abs(x_min/x_max) * -10;
+  upper = std::abs(y_max/y_min) * 10;
+  lower = std::abs(y_min/y_max) * -10;
 
   // make left bound line
-  pointA.append(-10);
-  pointA.append(10);
+  pointA.append(left);
+  pointA.append(-upper);
   left_bound.append(pointA);
-  pointB.append(-10);
-  pointB.append(-10);
+  pointB.append(left);
+  pointB.append(-lower);
   left_bound.append(pointB);
   result.append(left_bound);
   pointA = pointB = resetPoint;
 
   // make right bound line
-  pointA.append(10);
-  pointA.append(10);
+  pointA.append(right);
+  pointA.append(-upper);
   right_bound.append(pointA);
-  pointB.append(10);
-  pointB.append(-10);
+  pointB.append(right);
+  pointB.append(-lower);
   right_bound.append(pointB);
   result.append(right_bound);
   pointA = pointB = resetPoint;
 
-  // make upper bound line
-  pointA.append(-10);
-  pointA.append(10);
+  // make lower bound line (inverted in view)
+  pointA.append(left);
+  pointA.append(-lower);
   upper_bound.append(pointA);
-  pointB.append(10);
-  pointB.append(10);
+  pointB.append(right);
+  pointB.append(-lower);
   upper_bound.append(pointB);
   result.append(upper_bound);
   pointA = pointB = resetPoint;
 
-  // make lower bound line
-  pointA.append(-10);
-  pointA.append(-10);
+  // make upper bound line (inverted in view)
+  pointA.append(left);
+  pointA.append(-upper);
   lower_bound.append(pointA);
-  pointB.append(10);
-  pointB.append(-10);
+  pointB.append(right);
+  pointB.append(-upper);
   lower_bound.append(pointB);
   result.append(lower_bound);
   pointA = pointB = resetPoint;
@@ -739,10 +745,10 @@ Expression discrete_plot(const std::vector<Expression> & args){
   // make ordinate cross line
   if (x_min < 0) {
     pointA.append(0);
-    pointA.append(10);
+    pointA.append(-upper);
     ordinate_cross.append(pointA);
     pointB.append(0);
-    pointB.append(-10);
+    pointB.append(-lower);
     ordinate_cross.append(pointB);
     result.append(ordinate_cross);
     pointA = pointB = resetPoint;
@@ -750,10 +756,10 @@ Expression discrete_plot(const std::vector<Expression> & args){
 
   // make abscissa cross line
   if (y_min < 0) {
-    pointA.append(-10);
+    pointA.append(left);
     pointA.append(0);
     abscissa_cross.append(pointA);
-    pointB.append(10);
+    pointB.append(right);
     pointB.append(0);
     abscissa_cross.append(pointB);
     result.append(abscissa_cross);
@@ -765,12 +771,12 @@ Expression discrete_plot(const std::vector<Expression> & args){
     y_val = (it->tailConstEnd() - 1)->head().asNumber();
 
     // scale
-    if (x_val >= 0) x_val *= (10 / x_max);
-    else x_val *= (10 / std::abs(x_min));
+    if (x_val >= 0) x_val *= (right / x_max);
+    else x_val *= (-left / std::abs(x_min));
 
     // y-axis inverted in view
-    if (y_val >= 0) y_val *= (10 / y_max) * -1;
-    else y_val = y_val * (10 / std::abs(y_min)) * -1;
+    if (y_val >= 0) y_val *= (upper / y_max) * -1;
+    else y_val = y_val * (-lower / std::abs(y_min)) * -1;
 
     pointA = pointB = point = resetPoint;
     line = resetLine;
@@ -781,7 +787,7 @@ Expression discrete_plot(const std::vector<Expression> & args){
 
     pointA.append(x_val);
     if (y_min < 0) pointA.append(0);
-    else pointA.append(10);
+    else pointA.append(-lower);
     pointB.append(x_val);
     pointB.append(y_val);
     line.append(pointA);
@@ -806,8 +812,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-      point.append(Atom(0));
-      point.append(Atom(-13));
+      point.append(Atom(((x_max - x_min) / 2) + x_min));
+      point.append(Atom(-upper - 3));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
     }
@@ -816,8 +822,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-      point.append(Atom(0));
-      point.append(Atom(13));
+      point.append(Atom(((x_max - x_min) / 2) + x_min));
+      point.append(Atom(-lower + 3));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
     }
@@ -827,8 +833,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
       text.set_property(Atom("\"text-rotation\""), Expression(Atom(-std::atan2(0, -1) / 2)));
-      point.append(Atom(-13));
-      point.append(Atom(0));
+      point.append(Atom(left - 3));
+      point.append(Atom(((y_max - y_min) / 2) + y_min));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
     }
