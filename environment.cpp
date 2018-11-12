@@ -697,10 +697,13 @@ Expression discrete_plot(const std::vector<Expression> & args){
   // Create all lines necessary for plot
   double right, left, upper, lower;
 
-  right = std::abs(x_max/x_min) * 10;
-  left = std::abs(x_min/x_max) * -10;
-  upper = std::abs(y_max/y_min) * 10;
-  lower = std::abs(y_min/y_max) * -10;
+  double x_coeff = 20 / (x_max - x_min);
+  double y_coeff = 20 / (y_max - y_min);
+
+  right = x_max * x_coeff;
+  left = x_min * x_coeff;
+  upper = y_max * y_coeff;
+  lower = y_min * y_coeff;
 
   // make left bound line
   pointA.append(left);
@@ -772,11 +775,11 @@ Expression discrete_plot(const std::vector<Expression> & args){
 
     // scale
     if (x_val >= 0) x_val *= (right / x_max);
-    else x_val *= (-left / std::abs(x_min));
-
+    else x_val *= (std::abs(left) / std::abs(x_min));
+ 
     // y-axis inverted in view
     if (y_val >= 0) y_val *= (upper / y_max) * -1;
-    else y_val = y_val * (-lower / std::abs(y_min)) * -1;
+    else y_val = y_val * (std::abs(lower) / std::abs(y_min)) * -1;
 
     pointA = pointB = point = resetPoint;
     line = resetLine;
@@ -812,7 +815,7 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-      point.append(Atom(((x_max - x_min) / 2) + x_min));
+      point.append(Atom(((right - left) / 2) + left));
       point.append(Atom(-upper - 3));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
@@ -822,7 +825,7 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
       text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-      point.append(Atom(((x_max - x_min) / 2) + x_min));
+      point.append(Atom(((right - left) / 2) + left));
       point.append(Atom(-lower + 3));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
@@ -834,7 +837,7 @@ Expression discrete_plot(const std::vector<Expression> & args){
       text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
       text.set_property(Atom("\"text-rotation\""), Expression(Atom(-std::atan2(0, -1) / 2)));
       point.append(Atom(left - 3));
-      point.append(Atom(((y_max - y_min) / 2) + y_min));
+      point.append(Atom(-1 * (((upper - lower) / 2) + lower)));
       text.set_property(Atom("\"position\""), point);
       result.append(text);
     }
@@ -849,8 +852,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
   text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(-12));
-  point.append(Atom(-10));
+  point.append(Atom(left - 2));
+  point.append(Atom(-upper));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
 
@@ -860,8 +863,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
   text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(-12));
-  point.append(Atom(10));
+  point.append(Atom(left - 2));
+  point.append(Atom(-lower));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
 
@@ -871,8 +874,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
   text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(10));
-  point.append(Atom(12));
+  point.append(Atom(right));
+  point.append(Atom(-lower + 2));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
 
@@ -882,8 +885,8 @@ Expression discrete_plot(const std::vector<Expression> & args){
   text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
-  point.append(Atom(-10));
-  point.append(Atom(12));
+  point.append(Atom(left));
+  point.append(Atom(-lower + 2));
   text.set_property(Atom("\"position\""), point);
   result.append(text);
   
