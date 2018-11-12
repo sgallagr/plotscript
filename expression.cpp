@@ -402,15 +402,16 @@ Expression Expression::eval(Environment & env) {
 
         // evaluate each argument according to procedure and place in result list
         Atom proc = m_tail[0].head();
+        Expression args = m_tail[1].eval(env);
         Expression result(Atom("list"));
 
-        for (auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it) {
+        for (auto it = args.tailConstBegin(); it != args.tailConstEnd(); ++it) {
           Expression temp(proc);
           temp.append(*it);
           result.append(temp.eval(env));
         }
         
-        if (m_tail[1].isList() || (result.isList() && m_tail[1].tailConstBegin() != m_tail[1].tailConstEnd())) {
+        if (m_tail[1].isList() || (args.isList() && args.tailConstBegin() != args.tailConstEnd())) {
           return result;
         }
         else {

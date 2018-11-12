@@ -834,8 +834,13 @@ Expression discrete_plot(const std::vector<Expression> & args){
     }
   }
 
+  std::ostringstream out;
+  out.precision(2);
+
   point = resetPoint;
-  text = Expression(Atom("y_max"));
+  out.str("");
+  out << y_max;
+  text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
   point.append(Atom(-12));
@@ -844,7 +849,9 @@ Expression discrete_plot(const std::vector<Expression> & args){
   result.append(text);
 
   point = resetPoint;
-  text = Expression(Atom("y_min"));
+  out.str("");
+  out << y_min;
+  text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
   point.append(Atom(-12));
@@ -853,7 +860,9 @@ Expression discrete_plot(const std::vector<Expression> & args){
   result.append(text);
 
   point = resetPoint;
-  text = Expression(Atom("x_max"));
+  out.str("");
+  out << x_max;
+  text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
   point.append(Atom(10));
@@ -862,7 +871,9 @@ Expression discrete_plot(const std::vector<Expression> & args){
   result.append(text);
 
   point = resetPoint;
-  text = Expression(Atom("x_min"));
+  out.str("");
+  out << x_min;
+  text = Expression(Atom(out.str()));
   text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
   text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
   point.append(Atom(-10));

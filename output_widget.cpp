@@ -108,8 +108,10 @@ void OutputWidget::handle_text(Expression & exp) {
     std::string str = exp.head().asSymbol();
 
     // remove quotations at beginning and end
-    str.replace(str.begin(), str.begin() + 1, "");
-    str.replace(str.end() - 1, str.end(), "");
+    if (str.front() == '"') {
+      str.replace(str.begin(), str.begin() + 1, "");
+      str.replace(str.end() - 1, str.end(), "");
+    }
 
     if (exp.get_property(Atom("\"text-rotation\"")).head().isNumber()){
       rotate_val = (180/PI) * exp.get_property(Atom("\"text-rotation\"")).head().asNumber();
@@ -128,10 +130,11 @@ void OutputWidget::handle_text(Expression & exp) {
     text = scene->addText(str.c_str());
     text->setFont(font);
     text->setScale(scale_val);
-    text->setRotation(rotate_val);
     height = text->boundingRect().height();
     width = text->boundingRect().width();
+    text->setTransformOriginPoint(QPointF(width/2, height/2));
     text->setPos(x - (width/2), y - (height/2));
+    text->setRotation(rotate_val);
   }
   else scene->addText("Error: Invalid position property");
 }
