@@ -115,6 +115,7 @@ private:
   Expression handle_lambda(Environment & env);
   Expression handle_set_property(Environment & env);
   Expression handle_get_property(Environment & env);
+  Expression handle_continuous_plot(Environment & env);
 
   // the property map
   std::map<std::string, Expression> propmap;

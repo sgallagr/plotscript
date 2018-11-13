@@ -301,6 +301,301 @@ Expression Expression::handle_get_property(Environment & env){
   return result;
 }
 
+Expression Expression::handle_continuous_plot(Environment & env){
+  Expression initial;
+  Expression result(Atom("list"));
+  result.set_property(Atom("\"discrete-plot\""), Expression(Atom("\"true\"")));
+
+  double x_min, y_min, x_max, y_max, x_val, y_val;
+  double text_scale = 1;
+  
+  Expression resetLine(Atom("list")), line, left_bound, right_bound, upper_bound, lower_bound, ordinate_cross, abscissa_cross;
+  resetLine.set_property(Atom("\"object-name\""), Expression(Atom("\"line\"")));
+  resetLine.set_property(Atom("\"thickness\""), Expression(Atom(0)));
+  left_bound = right_bound = upper_bound = lower_bound = ordinate_cross = abscissa_cross = line = resetLine;
+
+  Expression resetPoint(Atom("list")), point, pointA, pointB;
+  resetPoint.set_property(Atom("\"object-name\""), Expression(Atom("\"point\"")));
+  resetPoint.set_property(Atom("\"size\""), Expression(Atom(0.5)));
+  pointA = pointB = point = resetPoint;
+
+  Expression text;
+
+
+  // tail must have size 2 or 3 or error
+  if(m_tail.size() != 2 && m_tail.size() != 3){
+    throw SemanticError("Error during evaluation: invalid number of arguments to continuous-plot");
+  }
+  
+  // tail[0] must contain a lambda function
+  if (env.get_exp(m_tail[0].head()).head().asSymbol() != "lambda") {
+    throw SemanticError("Error during evaluation: first argument to continuous-plot not a lambda function");
+  }
+
+  // tail[1] must contain a list that is not empty
+  if (!m_tail[1].isList() || (m_tail[1].tailConstBegin() == m_tail[1].tailConstEnd())) {
+    throw SemanticError("Error during evaluation: second argument to continuous-plot not a list or an emtpy list");
+  }
+
+  // tail[2] must contain a list
+  if (m_tail.size() == 3 && !m_tail[2].isList()) {
+    throw SemanticError("Error during evaluation: third argument to continuous-plot not a list");
+  }
+
+ Expression x_values = m_tail[1].eval(env);
+ Expression proc(m_tail[0].head().asSymbol());
+ Expression y_values;
+ Expression temp;
+ Expression x_valuesNew;
+
+ // Get y values
+  for(auto it = x_values.tailConstBegin(); it != x_values.tailConstEnd(); ++it){
+   
+    temp = proc;
+
+    if(it->head().isNumber())
+      x_val = it->head().asNumber();
+    else
+      throw SemanticError("Error during evaluation: argument in bounds list not a number");
+
+    temp.append(x_val);
+    y_values.append(temp.eval(env));
+  }
+
+  if (x_values.m_tail.size() != y_values.m_tail.size()) {
+    throw SemanticError("Error during evaluation: number of x and y values for points not equal");
+  }
+
+ // Determine max and min x and y values for plot
+  x_min = x_max = x_values.m_tail[0].head().asNumber();
+  y_min = y_max = y_values.m_tail[0].head().asNumber();
+
+  for(unsigned i = 0; i < y_values.m_tail.size(); ++i){
+    x_val = x_values.m_tail[i].head().asNumber();
+    y_val = y_values.m_tail[i].head().asNumber();
+    
+    if (x_min > x_val) x_min = x_val;
+    else if (x_max < x_val) x_max = x_val;
+     
+    if (y_min > y_val) y_min = y_val;
+    else if (y_max < y_val) y_max = y_val; 
+  }
+
+  // Create all lines necessary for plot
+  double right, left, upper, lower;
+
+  double x_coeff = 20 / (x_max - x_min);
+  double y_coeff = 20 / (y_max - y_min);
+
+  right = x_max * x_coeff;
+  left = x_min * x_coeff;
+  upper = y_max * y_coeff;
+  lower = y_min * y_coeff;
+
+  double inc_val = (x_max - x_min) / 50;
+  double x_valNext, y_valNext;
+
+  // Make all lines
+  for(double i = x_min; i < x_max; i += inc_val){
+   
+    pointA = pointB = resetPoint;
+    line = resetLine;
+
+    temp = proc;
+    x_val = i;
+    temp.append(x_val);
+    y_val = temp.eval(env).head().asNumber();
+
+    temp = proc;
+    x_valNext = x_val + inc_val;
+    temp.append(x_valNext);
+    y_valNext = temp.eval(env).head().asNumber();
+
+    // scale
+    if (x_val >= 0) x_val *= (right / x_max);
+    else x_val *= (std::abs(left) / std::abs(x_min));
+ 
+    // y-axis inverted in view
+    if (y_val >= 0) y_val *= (upper / y_max) * -1;
+    else y_val = y_val * (std::abs(lower) / std::abs(y_min)) * -1;
+
+    // scale
+    if (x_valNext >= 0) x_valNext *= (right / x_max);
+    else x_valNext *= (std::abs(left) / std::abs(x_min));
+ 
+    // y-axis inverted in view
+    if (y_valNext >= 0) y_valNext *= (upper / y_max) * -1;
+    else y_valNext = y_valNext * (std::abs(lower) / std::abs(y_min)) * -1;
+
+    pointA.append(x_val);
+    pointA.append(y_val);
+    line.append(pointA);
+    pointB.append(x_valNext);
+    pointB.append(y_valNext);
+    line.append(pointB);
+    result.append(line);
+
+  }
+
+  // make left bound line
+  pointA = pointB = resetPoint;
+  pointA.append(left);
+  pointA.append(-upper);
+  left_bound.append(pointA);
+  pointB.append(left);
+  pointB.append(-lower);
+  left_bound.append(pointB);
+  result.append(left_bound);
+  pointA = pointB = resetPoint;
+
+  // make right bound line
+  pointA.append(right);
+  pointA.append(-upper);
+  right_bound.append(pointA);
+  pointB.append(right);
+  pointB.append(-lower);
+  right_bound.append(pointB);
+  result.append(right_bound);
+  pointA = pointB = resetPoint;
+
+  // make lower bound line (inverted in view)
+  pointA.append(left);
+  pointA.append(-lower);
+  upper_bound.append(pointA);
+  pointB.append(right);
+  pointB.append(-lower);
+  upper_bound.append(pointB);
+  result.append(upper_bound);
+  pointA = pointB = resetPoint;
+
+  // make upper bound line (inverted in view)
+  pointA.append(left);
+  pointA.append(-upper);
+  lower_bound.append(pointA);
+  pointB.append(right);
+  pointB.append(-upper);
+  lower_bound.append(pointB);
+  result.append(lower_bound);
+  pointA = pointB = resetPoint;
+
+  // make ordinate cross line
+  if (x_min < 0) {
+    pointA.append(0);
+    pointA.append(-upper);
+    ordinate_cross.append(pointA);
+    pointB.append(0);
+    pointB.append(-lower);
+    ordinate_cross.append(pointB);
+    result.append(ordinate_cross);
+    pointA = pointB = resetPoint;
+  }
+
+  // make abscissa cross line
+  if (y_min < 0) {
+    pointA.append(left);
+    pointA.append(0);
+    abscissa_cross.append(pointA);
+    pointB.append(right);
+    pointB.append(0);
+    abscissa_cross.append(pointB);
+    result.append(abscissa_cross);
+  }
+
+// Find text scaling value if any
+  if (m_tail.size() == 3) {
+    for(auto it = m_tail[2].tailConstBegin(); it != m_tail[2].tailConstEnd(); ++it){
+      if (it->tailConstBegin()->head().asSymbol() == "text-scale") {
+        text_scale = (it->tailConstEnd() - 1)->head().asNumber();
+      }
+    }
+
+    for(auto it = m_tail[2].tailConstBegin(); it != m_tail[2].tailConstEnd(); ++it){
+      point = resetPoint;
+      point.set_property(Atom("\"size\""), Expression(Atom(0)));
+
+      if (it->tailConstBegin()->head().asSymbol() == "\"title\"") {
+        text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
+        text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
+        text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
+        point.append(Atom(((right - left) / 2) + left));
+        point.append(Atom(-upper - 3));
+        text.set_property(Atom("\"position\""), point);
+        result.append(text);
+      }
+
+      else if (it->tailConstBegin()->head().asSymbol() == "\"abscissa-label\"") {
+        text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
+        text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
+        text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
+        point.append(Atom(((right - left) / 2) + left));
+        point.append(Atom(-lower + 3));
+        text.set_property(Atom("\"position\""), point);
+        result.append(text);
+      }
+
+      else if (it->tailConstBegin()->head().asSymbol() == "\"ordinate-label\"") {
+        text = Expression((it->tailConstEnd() - 1)->head().asSymbol());
+        text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
+        text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
+        text.set_property(Atom("\"text-rotation\""), Expression(Atom(-std::atan2(0, -1) / 2)));
+        point.append(Atom(left - 3));
+        point.append(Atom(-1 * (((upper - lower) / 2) + lower)));
+        text.set_property(Atom("\"position\""), point);
+        result.append(text);
+      }
+    }
+  }
+
+  std::ostringstream out;
+  out.precision(2);
+
+  point = resetPoint;
+  out.str("");
+  out << y_max;
+  text = Expression(Atom(out.str()));
+  text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
+  text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
+  point.append(Atom(left - 2));
+  point.append(Atom(-upper));
+  text.set_property(Atom("\"position\""), point);
+  result.append(text);
+
+  point = resetPoint;
+  out.str("");
+  out << y_min;
+  text = Expression(Atom(out.str()));
+  text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
+  text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
+  point.append(Atom(left - 2));
+  point.append(Atom(-lower));
+  text.set_property(Atom("\"position\""), point);
+  result.append(text);
+
+  point = resetPoint;
+  out.str("");
+  out << x_max;
+  text = Expression(Atom(out.str()));
+  text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
+  text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
+  point.append(Atom(right));
+  point.append(Atom(-lower + 2));
+  text.set_property(Atom("\"position\""), point);
+  result.append(text);
+
+  point = resetPoint;
+  out.str("");
+  out << x_min;
+  text = Expression(Atom(out.str()));
+  text.set_property(Atom("\"object-name\""), Expression(Atom("\"text\"")));
+  text.set_property(Atom("\"text-scale\""), Expression(Atom(text_scale)));
+  point.append(Atom(left));
+  point.append(Atom(-lower + 2));
+  text.set_property(Atom("\"position\""), point);
+  result.append(text);
+ 
+  return result;
+}
+
 
 // this is a simple recursive version. the iterative version is more
 // difficult with the ast data structure used (no parent pointer).
@@ -310,27 +605,31 @@ Expression Expression::eval(Environment & env) {
   // lookup only if tail is empty and the head is not list
   if (m_tail.empty() && m_head.asSymbol() != "list") {
     return handle_lookup(m_head, env);
-    }
+  }
   // handle begin special-form
   else if (m_head.isSymbol() && m_head.asSymbol() == "begin") {
     return handle_begin(env);
-    }
+  }
   // handle define special-form
   else if (m_head.isSymbol() && m_head.asSymbol() == "define") {
     return handle_define(env);
-    }
+  }
   // handle lambda special-form
   else if (m_head.isSymbol() && m_head.asSymbol() == "lambda") {
     return handle_lambda(env);
-    }
+  }
   // handle set-property special procedure
   else if (m_head.isSymbol() && m_head.asSymbol() == "set-property") {
     return handle_set_property(env);
-    }
+  }
   // handle get-property special procedure
   else if (m_head.isSymbol() && m_head.asSymbol() == "get-property") {
     return handle_get_property(env);
-    }
+  }
+  // handle continuous-plot special procedure
+  else if (m_head.isSymbol() && m_head.asSymbol() == "continuous-plot") {
+    return handle_continuous_plot(env);
+  }
   // else attempt to treat as procedure
   else {
     std::vector<Expression> results;
