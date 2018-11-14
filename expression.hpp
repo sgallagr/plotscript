@@ -115,7 +115,6 @@ private:
   Expression handle_lambda(Environment & env);
   Expression handle_set_property(Environment & env);
   Expression handle_get_property(Environment & env);
-  Expression smooth_plot(Expression lines, Expression proc);
   Expression handle_continuous_plot(Environment & env);
 
   // the property map

@@ -301,67 +301,6 @@ Expression Expression::handle_get_property(Environment & env){
   return result;
 }
 
-Expression Expression::smooth_plot(Expression lines, Expression proc) {
-  
-
-  Expression resetLine(Atom("list")), newLine1, newLine2, newLine3, newLine4;
-  resetLine.set_property(Atom("\"object-name\""), Expression(Atom("\"line\"")));
-  resetLine.set_property(Atom("\"thickness\""), Expression(Atom(0)));
-  newLine1 = newLine2 = newLine3 = newLine4 = resetLine;
-
-  Expression resetPoint(Atom("list")), pointA, pointB;
-  resetPoint.set_property(Atom("\"object-name\""), Expression(Atom("\"point\"")));
-  resetPoint.set_property(Atom("\"size\""), Expression(Atom(0.5)));
-  pointA = pointB = resetPoint;
-
-  const double PI = std::atan2(0, -1);
-  
-  Expression temp;
-  Expression result;
-  Expression line1, line2, point1, point2, point3;
- 
-  double angle;
-  double lengthA, lengthB, lengthC;
-  double x1, x2, x3, y1, y2, y3, newY1, newY2, newX1, newX2;
-
-  for (auto it = lines.tailConstBegin(); it < lines.tailConstEnd(); ++it) {
-
-    line1 = *it;
-    line2 = *(it + 1);
-
-    point1 = line1.m_tail[0];
-    point2 = line1.m_tail[1];
-    point3 = line2.m_tail[0];
-
-    x1 = point1.m_tail[0].head().asNumber();
-    y1 = point1.m_tail[1].head().asNumber();
-    x2 = point2.m_tail[0].head().asNumber();
-    y2 = point2.m_tail[1].head().asNumber();
-    x3 = point3.m_tail[0].head().asNumber();
-    y3 = point3.m_tail[1].head().asNumber();
-
-    lengthA = std::sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
-    lengthB = std::sqrt(((x3 - x2) * (x3 - x2)) + ((y3 - y2) * (y3 - y2)));
-    lengthC = std::sqrt(((x3 - x1) * (x3 - x1)) + ((y3 - y1) * (y3 - y1)));
-
-    angle = (180/PI) * acos( ((lengthA * lengthA) + (lengthB * lengthB) - (lengthC * lengthC)) / (2 * lengthA * lengthB) );
-    
-    if (angle < 175) {
-      for (int i = 0; i < 10; i++) {
-
-        newLine1 = newLine2 = newLine3 = newLine4 = resetLine;
-        temp = proc;
-        newX1 = (x2 - x1) / 2;
-        temp.append(newX1);
-
-      }
-    }
-
-  }
-
-  return result;
-}
-
 Expression Expression::handle_continuous_plot(Environment & env){
   Expression initial;
   Expression result(Atom("list"));
@@ -402,6 +341,8 @@ Expression Expression::handle_continuous_plot(Environment & env){
   if (m_tail.size() == 3 && !m_tail[2].isList()) {
     throw SemanticError("Error during evaluation: third argument to continuous-plot not a list");
   }
+
+
 
  Expression x_values = m_tail[1].eval(env);
  Expression proc(m_tail[0].head().asSymbol());
