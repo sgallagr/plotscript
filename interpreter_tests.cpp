@@ -636,3 +636,79 @@ TEST_CASE("Test set and get-property procdedures", "[interpreter]") {
   REQUIRE(Expression(result) == Expression(1));
 
 }
+
+TEST_CASE("Test discrete-plot procdedure", "[interpreter]") {
+  Expression result;
+  Interpreter interp;
+
+  std::string program;
+
+  INFO("trying to define lambda")
+  program = "(define f (lambda (x) (+ (* 2 x) 1)))";
+
+  std::istringstream iss(program);
+ 
+  bool ok = interp.parseStream(iss);
+  if(!ok){
+    std::cerr << "Failed to parse: " << program << std::endl; 
+  }
+  REQUIRE(ok == true);
+
+  REQUIRE_NOTHROW(interp.evaluate());
+
+
+  INFO("trying discrete-plot")
+  program = "(discrete-plot (map f (range -2 2 0.5)) (list (list \"title\" \"Test\") (list \"abscissa-label\" \"X\") (list \"ordinate-label\" \"Y\") (list \"text-scale\" 1)))";
+
+  iss.clear();
+  iss.str(program);
+    
+  ok = interp.parseStream(iss);
+  if(!ok){
+    std::cerr << "Failed to parse: " << program << std::endl; 
+  }
+  REQUIRE(ok == true);
+
+  REQUIRE_NOTHROW(result = interp.evaluate());
+
+  REQUIRE(result.tailSize() == 32);
+
+}
+
+TEST_CASE("Test continuous-plot procdedure", "[interpreter]") {
+  Expression result;
+  Interpreter interp;
+
+  std::string program;
+
+  INFO("trying to define lambda")
+  program = "(define f (lambda (x) (+ (* 2 x) 1)))";
+
+  std::istringstream iss(program);
+ 
+  bool ok = interp.parseStream(iss);
+  if(!ok){
+    std::cerr << "Failed to parse: " << program << std::endl; 
+  }
+  REQUIRE(ok == true);
+
+  REQUIRE_NOTHROW(interp.evaluate());
+
+
+  INFO("trying discrete-plot")
+  program = "(continuous-plot f (list -2 2) (list (list \"title\" \"Test\") (list \"abscissa-label\" \"X\") (list \"ordinate-label\" \"Y\") (list \"text-scale\" 1)))";
+
+  iss.clear();
+  iss.str(program);
+    
+  ok = interp.parseStream(iss);
+  if(!ok){
+    std::cerr << "Failed to parse: " << program << std::endl; 
+  }
+  REQUIRE(ok == true);
+
+  REQUIRE_NOTHROW(result = interp.evaluate());
+
+  REQUIRE(result.tailSize() == 32);
+
+}

@@ -60,6 +60,9 @@ public:
   /// return a const-iterator to the tail end
   ConstIteratorType tailConstEnd() const noexcept;
 
+  /// return tail length
+  int tailSize();
+
   /// convienience member to determine if head atom is a number
   bool isHeadNumber() const noexcept;
 
@@ -115,6 +118,7 @@ private:
   Expression handle_lambda(Environment & env);
   Expression handle_set_property(Environment & env);
   Expression handle_get_property(Environment & env);
+  Expression handle_discrete_plot(Environment & env);
   Expression handle_continuous_plot(Environment & env);
 
   // the property map
