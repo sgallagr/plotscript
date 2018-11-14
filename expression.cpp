@@ -333,8 +333,8 @@ Expression Expression::handle_continuous_plot(Environment & env){
   }
 
   // tail[1] must contain a list that is not empty
-  if (!m_tail[1].isList() || (m_tail[1].tailConstBegin() == m_tail[1].tailConstEnd())) {
-    throw SemanticError("Error during evaluation: second argument to continuous-plot not a list or an emtpy list");
+  if (!m_tail[1].isList() || m_tail[1].m_tail.size() != 2) {
+    throw SemanticError("Error during evaluation: second argument to continuous-plot not a list or incorrect number of items in list");
   }
 
   // tail[2] must contain a list
@@ -346,36 +346,28 @@ Expression Expression::handle_continuous_plot(Environment & env){
  Expression proc(m_tail[0].head().asSymbol());
  Expression y_values;
  Expression temp;
- Expression x_valuesNew;
 
- // Get y values
-  for(auto it = x_values.tailConstBegin(); it != x_values.tailConstEnd(); ++it){
-   
+ x_min = x_values.m_tail[0].head().asNumber();
+ x_max = x_values.m_tail[1].head().asNumber();
+
+ double inc_val = (x_max - x_min) / 50.0;
+
+   // Make all lines
+  for(double i = x_min; i < x_max + inc_val; i += inc_val){
+
     temp = proc;
-
-    if(it->head().isNumber())
-      x_val = it->head().asNumber();
-    else
-      throw SemanticError("Error during evaluation: argument in bounds list not a number");
-
+    x_val = i;
     temp.append(x_val);
-    y_values.append(temp.eval(env));
+    y_val = temp.eval(env).head().asNumber();
+
+    y_values.append(y_val);
   }
 
-  if (x_values.m_tail.size() != y_values.m_tail.size()) {
-    throw SemanticError("Error during evaluation: number of x and y values for points not equal");
-  }
-
- // Determine max and min x and y values for plot
-  x_min = x_max = x_values.m_tail[0].head().asNumber();
+ // Determine max and min y values for plot
   y_min = y_max = y_values.m_tail[0].head().asNumber();
 
   for(unsigned i = 0; i < y_values.m_tail.size(); ++i){
-    x_val = x_values.m_tail[i].head().asNumber();
     y_val = y_values.m_tail[i].head().asNumber();
-    
-    if (x_min > x_val) x_min = x_val;
-    else if (x_max < x_val) x_max = x_val;
      
     if (y_min > y_val) y_min = y_val;
     else if (y_max < y_val) y_max = y_val; 
@@ -392,7 +384,7 @@ Expression Expression::handle_continuous_plot(Environment & env){
   upper = y_max * y_coeff;
   lower = y_min * y_coeff;
 
-  double inc_val = (x_max - x_min) / 50;
+ 
   double x_valNext, y_valNext;
 
   // Make all lines
