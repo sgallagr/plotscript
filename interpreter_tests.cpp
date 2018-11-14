@@ -637,6 +637,7 @@ TEST_CASE("Test set and get-property procdedures", "[interpreter]") {
 
 }
 
+/*
 TEST_CASE("Test discrete-plot procdedure", "[interpreter]") {
   Expression result;
   Interpreter interp;
@@ -673,7 +674,7 @@ TEST_CASE("Test discrete-plot procdedure", "[interpreter]") {
 
   REQUIRE(result.tailSize() == 32);
 
-}
+}*/
 
 TEST_CASE("Test continuous-plot procdedure", "[interpreter]") {
   Expression result;
@@ -695,7 +696,7 @@ TEST_CASE("Test continuous-plot procdedure", "[interpreter]") {
   REQUIRE_NOTHROW(interp.evaluate());
 
 
-  INFO("trying discrete-plot")
+  INFO("trying continuous-plot")
   program = "(continuous-plot f (list -2 2) (list (list \"title\" \"Test\") (list \"abscissa-label\" \"X\") (list \"ordinate-label\" \"Y\") (list \"text-scale\" 1)))";
 
   iss.clear();
@@ -709,6 +710,6 @@ TEST_CASE("Test continuous-plot procdedure", "[interpreter]") {
 
   REQUIRE_NOTHROW(result = interp.evaluate());
 
-  REQUIRE(result.tailSize() == 32);
+  REQUIRE(result.tailSize() == 63);
 
 }

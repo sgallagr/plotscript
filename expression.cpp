@@ -343,12 +343,14 @@ Expression Expression::handle_discrete_plot(Environment & env){
   }
 
   // Determine max and min x and y values for plot
-  x_min = x_max = data.m_tail[0].m_tail[0].head().asNumber();
-  y_min = y_max = data.m_tail[0].m_tail[1].head().asNumber();
+  Expression tempPoint = data.m_tail[0].eval(env);
+  x_min = x_max = tempPoint.m_tail[0].head().asNumber();
+  y_min = y_max = tempPoint.m_tail[1].head().asNumber();
 
   for(auto it = data.tailConstBegin(); it != data.tailConstEnd(); ++it){
-    x_val = it->m_tail[0].head().asNumber();
-    y_val = it->m_tail[1].head().asNumber();
+    tempPoint = *it;
+    x_val = tempPoint.m_tail[0].head().asNumber();
+    y_val = tempPoint.m_tail[1].head().asNumber();
     
     if (x_min > x_val) x_min = x_val;
     else if (x_max < x_val) x_max = x_val;
@@ -465,7 +467,7 @@ Expression Expression::handle_discrete_plot(Environment & env){
   
   // Find text scaling value if any
   for(auto it = m_tail[1].tailConstBegin(); it != m_tail[1].tailConstEnd(); ++it){
-    if (it->tailConstBegin()->head().asSymbol() == "text-scale") {
+    if (it->tailConstBegin()->head().asSymbol() == "\"text-scale\"") {
       text_scale = (it->tailConstEnd() - 1)->head().asNumber();
     }
   }
