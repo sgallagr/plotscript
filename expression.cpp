@@ -310,7 +310,7 @@ Expression Expression::handle_discrete_plot(Environment & env){
   Expression result(Atom("list"));
   result.set_property(Atom("\"discrete-plot\""), Expression(Atom("\"true\"")));
 
-  double x_min, y_min, x_max, y_max, x_val, y_val;
+  double x_min, x_max, y_min, y_max, x_val, y_val;
   double text_scale = 1;
   
   Expression resetLine(Atom("list")), line, left_bound, right_bound, upper_bound, lower_bound, ordinate_cross, abscissa_cross;
@@ -325,16 +325,9 @@ Expression Expression::handle_discrete_plot(Environment & env){
 
   Expression text;
 
-  Expression data = m_tail[0].eval(env);
-
   // tail must have size 2 or error
   if(m_tail.size() != 2){
     throw SemanticError("Error during evaluation: invalid number of arguments to discrete-plot");
-  }
-  
-  // tail[0] must contain a non-empty list
-  if (!data.isList() || data.tailSize() == 0) {
-    throw SemanticError("Error during evaluation: first argument to discrete-plot not a non-empty list");
   }
 
   // tail[1] must contain a list
@@ -342,15 +335,20 @@ Expression Expression::handle_discrete_plot(Environment & env){
     throw SemanticError("Error during evaluation: second argument to discrete-plot not a list");
   }
 
+  Expression data = m_tail[0].eval(env);
+  
+  // evaluated data must contain a non-empty list
+  if (!data.isList() || data.tailSize() == 0) {
+    throw SemanticError("Error during evaluation: first argument to discrete-plot not a non-empty list");
+  }
+
   // Determine max and min x and y values for plot
-  Expression tempPoint = data.m_tail[0].eval(env);
-  x_min = x_max = tempPoint.m_tail[0].head().asNumber();
-  y_min = y_max = tempPoint.m_tail[1].head().asNumber();
+  x_min = x_max = data.m_tail[0].tailConstBegin()->head().asNumber();
+  y_min = y_max = (data.m_tail[0].tailConstBegin() + 1)->head().asNumber();
 
   for(auto it = data.tailConstBegin(); it != data.tailConstEnd(); ++it){
-    tempPoint = *it;
-    x_val = tempPoint.m_tail[0].head().asNumber();
-    y_val = tempPoint.m_tail[1].head().asNumber();
+    x_val = it->m_tail[0].head().asNumber();
+    y_val = it->m_tail[1].head().asNumber();
     
     if (x_min > x_val) x_min = x_val;
     else if (x_max < x_val) x_max = x_val;

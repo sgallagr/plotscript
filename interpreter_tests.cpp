@@ -391,6 +391,7 @@ TEST_CASE( "Test some semantically invalid expresions", "[interpreter]" ) {
              "(set-property \"test\")",
              "(lambda (x))",
              "(get-property \"test\")",
+             "(continuous-plot 1)",
              "(+ 1 (list 1 2 3))", // invalid argument
              "(* 1 (list 1 2 3))",
              "(- 1 (list 1 2 3))",
@@ -637,7 +638,6 @@ TEST_CASE("Test set and get-property procdedures", "[interpreter]") {
 
 }
 
-/*
 TEST_CASE("Test discrete-plot procdedure", "[interpreter]") {
   Expression result;
   Interpreter interp;
@@ -645,7 +645,7 @@ TEST_CASE("Test discrete-plot procdedure", "[interpreter]") {
   std::string program;
 
   INFO("trying to define lambda")
-  program = "(define f (lambda (x) (+ (* 2 x) 1)))";
+  program = "(define f (lambda (x) (list x (+ (* 2 x) 1))))";
 
   std::istringstream iss(program);
  
@@ -672,9 +672,9 @@ TEST_CASE("Test discrete-plot procdedure", "[interpreter]") {
 
   REQUIRE_NOTHROW(result = interp.evaluate());
 
-  REQUIRE(result.tailSize() == 32);
+  REQUIRE(result.tailSize() == 31);
 
-}*/
+}
 
 TEST_CASE("Test continuous-plot procdedure", "[interpreter]") {
   Expression result;
