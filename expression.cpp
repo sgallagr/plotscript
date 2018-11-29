@@ -993,7 +993,7 @@ std::ostream & operator<<(std::ostream & out, const Expression & exp){
   bool complex = false;
   if (exp.head().isComplex()) complex = true;
 
-  if (exp.head().isNone()){ 
+  if (exp.head().isNone() && exp.tailConstBegin() == exp.tailConstEnd()){ 
     out << "NONE";
     return out;
   }
