@@ -2,10 +2,14 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <thread>
 
 #include "interpreter.hpp"
 #include "semantic_error.hpp"
 #include "startup_config.hpp"
+#include "threadsafequeue.hpp"
+#include "producer.hpp"
+#include "consumer.hpp"
 
 void prompt(){
   std::cout << "\nplotscript> ";
@@ -97,6 +101,12 @@ int main(int argc, char *argv[])
   Interpreter interp;
   
   std::ifstream ifs(STARTUP_FILE);
+
+  ThreadSafeQueue<std::string> string_queue;
+  ThreadSafeQueue<Expression> expression_queue;
+
+  Producer producer(&string_queue, &expression_queue);
+  Consumer consumer(&string_queue, &expression_queue, &interp);
   
   if(!ifs){
     error("Could not open startup file for reading.");
@@ -126,7 +136,12 @@ int main(int argc, char *argv[])
     }
   }
   else{
-    repl(interp);
+    //repl(interp);
+    std::thread producer_th(producer);
+    std::thread consumer_th(consumer);
+
+    producer_th.join();
+    consumer_th.join();
   }
     
   return EXIT_SUCCESS;

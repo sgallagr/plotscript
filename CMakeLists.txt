@@ -15,7 +15,6 @@ set(interpreter_src
   expression.hpp expression.cpp
   parse.hpp parse.cpp
   interpreter.hpp interpreter.cpp
-  threadsafequeue.hpp
   )
 
 # EDIT
@@ -35,6 +34,9 @@ set(unittest_src
 # EDIT
 # add source for any TUI modules here
 set(tui_src
+  threadsafequeue.hpp
+  producer.hpp
+  consumer.hpp
   )
 
 # EDIT
