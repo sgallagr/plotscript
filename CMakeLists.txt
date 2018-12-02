@@ -15,7 +15,7 @@ set(interpreter_src
   expression.hpp expression.cpp
   parse.hpp parse.cpp
   interpreter.hpp interpreter.cpp
-  threadsafequeue.hpp threadsafequeue.cpp
+  threadsafequeue.hpp
   )
 
 # EDIT
