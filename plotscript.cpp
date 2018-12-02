@@ -70,30 +70,25 @@ int eval_from_command(std::string argexp, Interpreter & interp){
 }
 
 // A REPL is a repeated read-eval-print loop
-void repl(Interpreter & interp){
-    
+void repl(ThreadSafeQueue<std::string> *pq, ThreadSafeQueue<Expression> *expq){
+   
   while(!std::cin.eof()){
-    
+   
     prompt();
     std::string line = readline();
     
     if(line.empty()) continue;
 
-    std::istringstream expression(line);
-    
-    if(!interp.parseStream(expression)){
-      error("Invalid Expression. Could not parse.");
-    }
-    else{
-      try{
-				Expression exp = interp.evaluate();
-				std::cout << exp << std::endl;
-      }
-      catch(const SemanticError & ex){
-				std::cerr << ex.what() << std::endl;
-      }
-    }
+    pq->push(line);
+
+    Expression exp;
+    expq->wait_and_pop(exp);
+
+    if(exp.head().asSymbol() == "Error") std::cout << exp.tailConstBegin()->head().asSymbol() << std::endl;
+    else std::cout << exp << std::endl;
+
   }
+
 }
 
 int main(int argc, char *argv[])
@@ -105,7 +100,6 @@ int main(int argc, char *argv[])
   ThreadSafeQueue<std::string> program_queue;
   ThreadSafeQueue<Expression> expression_queue;
 
-  Producer producer(&program_queue, &expression_queue);
   Consumer consumer(&program_queue, &expression_queue, &interp);
   
   if(!ifs){
@@ -136,11 +130,9 @@ int main(int argc, char *argv[])
     }
   }
   else{
-    //repl(interp);
-    std::thread producer_th(producer);
+    
     std::thread consumer_th(consumer);
-
-    producer_th.join();
+    repl(&program_queue, &expression_queue);
     consumer_th.join();
   }
     
