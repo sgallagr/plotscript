@@ -35,7 +35,6 @@ set(unittest_src
 # add source for any TUI modules here
 set(tui_src
   threadsafequeue.hpp
-  producer.hpp
   consumer.hpp
   )
 

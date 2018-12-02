@@ -8,7 +8,6 @@
 #include "semantic_error.hpp"
 #include "startup_config.hpp"
 #include "threadsafequeue.hpp"
-#include "producer.hpp"
 #include "consumer.hpp"
 
 void prompt(){
@@ -94,13 +93,14 @@ void repl(ThreadSafeQueue<std::string> *pq, ThreadSafeQueue<Expression> *expq){
 int main(int argc, char *argv[])
 {  
   Interpreter interp;
+  int running = 1;
   
   std::ifstream ifs(STARTUP_FILE);
 
   ThreadSafeQueue<std::string> program_queue;
   ThreadSafeQueue<Expression> expression_queue;
 
-  Consumer consumer(&program_queue, &expression_queue, &interp);
+  Consumer consumer(&program_queue, &expression_queue, &interp, &running);
   
   if(!ifs){
     error("Could not open startup file for reading.");
@@ -130,9 +130,81 @@ int main(int argc, char *argv[])
     }
   }
   else{
-    
     std::thread consumer_th(consumer);
-    repl(&program_queue, &expression_queue);
+
+    while(!std::cin.eof()){
+   
+      prompt();
+      std::string line = readline();
+    
+      if(line.empty()) continue;
+
+      if (running) {
+        if (line.front() == '%') {
+          if(line == "%start") {
+            continue;
+          }
+          else if(line == "%stop") {
+            program_queue.push(line);
+            continue;
+          }
+          /*else if (line == "%reset") {
+            program_queue.push("%stop");
+            consumer_th.join();
+            running = 1;
+            continue;
+          }*/
+          else if(line == "%exit") {
+            program_queue.push("%stop");
+            consumer_th.join();
+            return EXIT_SUCCESS;
+          }
+          else {
+            std::cout << "Error: invalid interpreter kernel directive" << std::endl;
+            continue;
+          }
+        }
+        else {
+          program_queue.push(line);
+
+          Expression exp;
+          expression_queue.wait_and_pop(exp);
+
+          if(exp.head().asSymbol() == "Error") std::cout << exp.tailConstBegin()->head().asSymbol() << std::endl;
+          else std::cout << exp << std::endl;
+        }
+      }
+      else {
+        if (line.front() == '%') {
+          /*if(line == "%start") {
+            running = 1;
+            std::thread consumer_th(consumer);
+            continue;
+          }*/
+          if(line == "%stop") continue;
+          /*else if (line == "%reset") {
+            program_queue.push("%stop");
+            consumer_th.join();
+            running = 1;
+            std::thread consumer_th(consumer);
+            continue;
+          }*/
+          else if(line == "%exit") {
+            program_queue.push("%stop");
+            consumer_th.join();
+            return EXIT_SUCCESS;
+          }
+          else std::cout << "Error: invalid interpreter kernel directive" << std::endl;
+        }
+        else {
+          std::cout << "Error: interpreter kernel not running" << std::endl;
+          continue;
+        }
+      }
+
+
+    }
+    
     consumer_th.join();
   }
     

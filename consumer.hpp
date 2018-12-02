@@ -13,11 +13,12 @@ class Consumer
 public:
 
   Consumer(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr,
-           Interpreter * interpreter)
+           Interpreter * interpreter, int * run_flag)
   {
     pq = programQueuePtr;
     expq = expressionQueuePtr;
     interp = interpreter;
+    running = run_flag;
   }
   
   void operator()() const
@@ -25,6 +26,11 @@ public:
     while(!std::cin.eof()){
       std::string program;
       pq->wait_and_pop(program);
+
+      if (program == "%stop") {
+        *running = 0;
+        return;
+      }
 
       std::istringstream expression(program);
 
@@ -51,6 +57,7 @@ private:
   ThreadSafeQueue<std::string> * pq;
   ThreadSafeQueue<Expression> * expq;
   Interpreter * interp;
+  int * running;
 };
 
 #endif
