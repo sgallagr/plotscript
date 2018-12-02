@@ -10,10 +10,10 @@ class Producer
 {
 public:
 
-  Producer(ThreadSafeQueue<std::string> *stringQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr)
+  Producer(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr)
   {
-    sq = stringQueuePtr;
-    eq = expressionQueuePtr;
+    pq = programQueuePtr;
+    expq = expressionQueuePtr;
   }
   
   void operator()() const
@@ -27,17 +27,20 @@ public:
     
       if(line.empty()) continue;
 
-      sq->push(line);
+      pq->push(line);
 
       Expression exp;
-      eq->wait_and_pop(exp);
-      std::cout << exp << std::endl;
+      expq->wait_and_pop(exp);
+
+      if(exp.head().asSymbol() == "Error") std::cout << exp.tailConstBegin()->head().asSymbol() << std::endl;
+      else std::cout << exp << std::endl;
+
     }
   }
 
 private:
-  ThreadSafeQueue<std::string> * sq;
-  ThreadSafeQueue<Expression> * eq;
+  ThreadSafeQueue<std::string> * pq;
+  ThreadSafeQueue<Expression> * expq;
 };
 
 #endif

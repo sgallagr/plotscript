@@ -102,11 +102,11 @@ int main(int argc, char *argv[])
   
   std::ifstream ifs(STARTUP_FILE);
 
-  ThreadSafeQueue<std::string> string_queue;
+  ThreadSafeQueue<std::string> program_queue;
   ThreadSafeQueue<Expression> expression_queue;
 
-  Producer producer(&string_queue, &expression_queue);
-  Consumer consumer(&string_queue, &expression_queue, &interp);
+  Producer producer(&program_queue, &expression_queue);
+  Consumer consumer(&program_queue, &expression_queue, &interp);
   
   if(!ifs){
     error("Could not open startup file for reading.");

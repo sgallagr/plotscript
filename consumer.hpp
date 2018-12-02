@@ -12,38 +12,44 @@ class Consumer
 {
 public:
 
-  Consumer(ThreadSafeQueue<std::string> *stringQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr, Interpreter * interpreter)
+  Consumer(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr,
+           Interpreter * interpreter)
   {
-    sq = stringQueuePtr;
-    eq = expressionQueuePtr;
+    pq = programQueuePtr;
+    expq = expressionQueuePtr;
     interp = interpreter;
   }
   
   void operator()() const
   {
-    std::string program;
-    sq->wait_and_pop(program);
+    while(!std::cin.eof()){
+      std::string program;
+      pq->wait_and_pop(program);
 
-    std::istringstream expression(program);
+      std::istringstream expression(program);
 
-    if(!interp->parseStream(expression)){
-      Expression exp(Atom("Error: Invalid Expression. Could not parse."));
-      eq->push(exp);
-    }
-    else{
-      try{
-				Expression exp = interp->evaluate();
-				eq->push(exp);
+      if(!interp->parseStream(expression)){
+        Expression exp = Expression(Atom("Error"));
+        exp.append(Expression(Atom("Error: Invalid Expression. Could not parse.")));
+        expq->push(exp);
       }
-      catch(const SemanticError & ex){
-        eq->push(Expression(Atom(ex.what())));
+      else{
+        try{
+				  Expression exp = interp->evaluate();
+				  expq->push(exp);
+        }
+        catch(const SemanticError & ex){
+          Expression exp = Expression(Atom("Error"));
+          exp.append(Expression(Atom(ex.what())));
+          expq->push(exp);
+        }
       }
     }
   }
 
 private:
-  ThreadSafeQueue<std::string> * sq;
-  ThreadSafeQueue<Expression> * eq;
+  ThreadSafeQueue<std::string> * pq;
+  ThreadSafeQueue<Expression> * expq;
   Interpreter * interp;
 };
 
