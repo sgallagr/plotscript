@@ -176,11 +176,12 @@ int main(int argc, char *argv[])
       }
       else {
         if (line.front() == '%') {
-          /*if(line == "%start") {
+          if(line == "%start") {
             running = 1;
-            std::thread consumer_th(consumer);
+            consumer_th.join();
+            consumer_th = std::thread(consumer);
             continue;
-          }*/
+          }
           if(line == "%stop") continue;
           /*else if (line == "%reset") {
             program_queue.push("%stop");
@@ -190,8 +191,6 @@ int main(int argc, char *argv[])
             continue;
           }*/
           else if(line == "%exit") {
-            program_queue.push("%stop");
-            consumer_th.join();
             return EXIT_SUCCESS;
           }
           else std::cout << "Error: invalid interpreter kernel directive" << std::endl;
