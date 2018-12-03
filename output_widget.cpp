@@ -147,7 +147,27 @@ void OutputWidget::process(Expression exp) {
 }
 
 void OutputWidget::eval(std::string s) {
-  std::string input = s;
+  std::istringstream expression(s);
+  
+  scene->clear();
+    
+  if(!interp.parseStream(expression)){
+    scene->addText("Error: Invalid Expression. Could not parse.");
+  }
+  else{
+    try{
+      process(interp.evaluate());
+    }
+    catch(const SemanticError & ex){
+		  scene->addText(ex.what());
+    }
+  }
+
+  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+  
+  
+  
+  /*std::string input = s;
 
   if (running) {
     if (input.front() == '%') {
@@ -173,16 +193,12 @@ void OutputWidget::eval(std::string s) {
 
       Expression exp;
       expression_queue.wait_and_pop(exp);
-      if(exp.head().asSymbol() == "Error") {
-        scene->clear();
-        scene->addText(exp.tailConstBegin()->head().asSymbol().c_str());
-        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-      }
-      else {
-        scene->clear();
-        process(exp);
-        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-      }
+
+      scene->clear();
+      if(exp.head().asSymbol() == "Error") scene->addText(exp.tailConstBegin()->head().asSymbol().c_str());
+      else process(exp);
+      view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+        
     }
   }
   else {
@@ -210,7 +226,7 @@ void OutputWidget::eval(std::string s) {
       scene->addText("Error: interpreter kernel not running");
       view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
     }
-  }
+  }*/
 }
 
 void OutputWidget::start_kernel() {
