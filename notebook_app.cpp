@@ -18,16 +18,16 @@ NotebookApp::NotebookApp() {
   QVBoxLayout *layout = new QVBoxLayout;
   QHBoxLayout *button_layout = new QHBoxLayout;
 
-  auto start = new QPushButton("Start Kernel");
+  auto start = new QPushButton("Start Kernel", this);
   start->setObjectName("start");
   button_layout->addWidget(start);
-  auto stop = new QPushButton("Stop Kernel");
+  auto stop = new QPushButton("Stop Kernel", this);
   stop->setObjectName("stop");
   button_layout->addWidget(stop);
-  auto reset = new QPushButton("Reset Kernel");
+  auto reset = new QPushButton("Reset Kernel", this);
   reset->setObjectName("reset");
   button_layout->addWidget(reset);
-  auto interrupt = new QPushButton("Interrupt");
+  auto interrupt = new QPushButton("Interrupt", this);
   interrupt->setObjectName("interrupt");
   button_layout->addWidget(interrupt);
 
