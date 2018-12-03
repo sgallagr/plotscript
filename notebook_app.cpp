@@ -31,7 +31,7 @@ NotebookApp::NotebookApp() {
   interrupt->setObjectName("interrupt");
   button_layout->addWidget(interrupt);
 
-  layout->addLayout(button_layout);
+  //layout->addLayout(button_layout);
   layout->addWidget(input);
   layout->addWidget(output);
   
