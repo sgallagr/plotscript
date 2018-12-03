@@ -24,7 +24,7 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
   interp = Interpreter(&program_queue, &expression_queue);
 
-  interp_th = std::thread(interp);
+  //interp_th = std::thread(interp);
 
 }
 
