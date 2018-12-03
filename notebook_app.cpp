@@ -11,7 +11,6 @@ NotebookApp::NotebookApp() {
   
   auto input = new InputWidget(this);
   auto output = new OutputWidget(this);
-  auto buttons = new QWidget(this);
 
   input->setObjectName("input");
   output->setObjectName("output");
@@ -32,9 +31,7 @@ NotebookApp::NotebookApp() {
   interrupt->setObjectName("interrupt");
   button_layout->addWidget(interrupt);
 
-  buttons->setLayout(button_layout);
-
-  layout->addWidget(buttons);
+  layout->addLayout(button_layout);
   layout->addWidget(input);
   layout->addWidget(output);
   
