@@ -22,33 +22,15 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
   setLayout(layout);
 
-  startup();
+  interp = Interpreter(&program_queue, &expression_queue, &running);
+
+  interp_th = std::thread(interp);
 
 }
 
 void OutputWidget::resizeEvent(QResizeEvent * event) {
   this->QWidget::resizeEvent(event);
   view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-}
-
-void OutputWidget::startup() {
-  std::ifstream ifs(STARTUP_FILE);
-
-  if (!ifs) {
-    scene->addText("Could not open startup file for reading.");
-  }
-
-  if (!interp.parseStream(ifs)) {
-    scene->addText("Invalid startup program. Could not parse.");
-  }
-  else {
-    try {
-      interp.evaluate();
-    }
-    catch (const SemanticError & ex) {
-      scene->addText("Startup program failed during evaluation");
-    }
-  }
 }
 
 void OutputWidget::handle_point(Expression & exp) {
@@ -165,21 +147,90 @@ void OutputWidget::process(Expression exp) {
 }
 
 void OutputWidget::eval(std::string s) {
-  std::istringstream expression(s);
+  std::string input = s;
 
-  scene->clear();
-    
-  if(!interp.parseStream(expression)){
-    scene->addText("Error: Invalid Expression. Could not parse.");
-  }
-  else{
-    try{
-      process(interp.evaluate());
+  if (running) {
+    if (input.front() == '%') {
+      if(input == "%start") {
+        return;
+      }
+      else if(input == "%stop") {
+        program_queue.push(input);
+        return;
+      }
+      else if (input == "%reset") {
+        program_queue.push("%stop");
+        running = 1;
+        interp_th.join();
+        interp = Interpreter(&program_queue, &expression_queue, &running);
+        interp_th = std::thread(interp);
+        return;
+      }
+      else {
+        scene->clear();
+        scene->addText("Error: invalid interpreter kernel directive");
+        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+        return;
+      }
     }
-    catch(const SemanticError & ex){
-		  scene->addText(ex.what());
-    }
-  }
+    else {
+      program_queue.push(input);
 
-  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+      Expression exp;
+      expression_queue.wait_and_pop(exp);
+      if(exp.head().asSymbol() == "Error") {
+        scene->clear();
+        scene->addText(exp.tailConstBegin()->head().asSymbol().c_str());
+        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+      }
+      else {
+        scene->clear();
+        process(exp);
+      }
+    }
+  }
+  else {
+    if (input.front() == '%') {
+      if(input == "%start") {
+        running = 1;
+        interp_th.join();
+        interp_th = std::thread(interp);
+        return;
+      }
+      else if(input == "%stop") return;
+      else if (input == "%reset") {
+        running = 1;
+        interp_th.join();
+        interp = Interpreter(&program_queue, &expression_queue, &running);
+        interp_th = std::thread(interp);
+        return;
+      }
+      else {
+        scene->clear();
+        scene->addText("Error: invalid interpreter kernel directive");
+        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+        return;
+      }
+    }
+    else {
+      scene->clear();
+      scene->addText("Error: interpreter kernel not running");
+      view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+      return;
+    }
+  }
 }
+
+void OutputWidget::start_kernel() {
+  eval("%start");
+}
+
+void OutputWidget::stop_kernel() {
+  eval("%stop");
+}
+
+void OutputWidget::reset_kernel() {
+  eval("%reset");
+}
+
+void OutputWidget::interrupt() {}

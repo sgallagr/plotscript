@@ -136,7 +136,10 @@ void repl(){
           interp_th.join();
           return;
         }
-        error("invalid interpreter kernel directive");
+        else {
+          error("invalid interpreter kernel directive");
+          continue;
+        }
       }
       else {
         error("interpreter kernel not running");

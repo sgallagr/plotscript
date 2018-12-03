@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QGraphicsTextItem>
+#include <thread>
 
 #include "interpreter.hpp"
 
@@ -15,8 +16,6 @@ Q_OBJECT
 public:
 
   OutputWidget(QWidget * parent = nullptr);
-
-  void startup();
 
   void resizeEvent(QResizeEvent * event);
 
@@ -32,9 +31,19 @@ public slots:
 
   void eval(std::string s);
 
+  void start_kernel();
+  void stop_kernel();
+  void reset_kernel();
+  void interrupt();
+
 private:
 
+  ThreadSafeQueue<std::string> program_queue;
+  ThreadSafeQueue<Expression> expression_queue;
+  int running = 1;
+
   Interpreter interp;
+  std::thread interp_th;
 
 };
 
