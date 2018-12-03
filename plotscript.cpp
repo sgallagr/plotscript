@@ -7,7 +7,6 @@
 #include "interpreter.hpp"
 #include "semantic_error.hpp"
 #include "threadsafequeue.hpp"
-#include "consumer.hpp"
 
 void prompt(){
   std::cout << "\nplotscript> ";
