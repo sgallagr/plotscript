@@ -229,7 +229,7 @@ void OutputWidget::eval(std::string s) {
   }*/
 }
 
-/*void OutputWidget::start_kernel() {
+void OutputWidget::start_kernel() {
   eval("%start");
 }
 
@@ -241,4 +241,4 @@ void OutputWidget::reset_kernel() {
   eval("%reset");
 }
 
-void OutputWidget::interrupt() {}*/
+void OutputWidget::interrupt() {}
