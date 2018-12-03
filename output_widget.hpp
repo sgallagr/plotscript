@@ -31,10 +31,10 @@ public slots:
 
   void eval(std::string s);
 
-  void start_kernel();
+  /*void start_kernel();
   void stop_kernel();
   void reset_kernel();
-  void interrupt();
+  void interrupt();*/
 
 private:
 
@@ -43,7 +43,7 @@ private:
   int running = 1;
 
   Interpreter interp;
-  std::thread interp_th;
+  //std::thread interp_th;
 
 };
 
