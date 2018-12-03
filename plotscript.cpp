@@ -68,7 +68,7 @@ void repl(){
   ThreadSafeQueue<Expression> expression_queue;
   int running = 1;
 
-  Interpreter interp(&program_queue, &expression_queue, &running);
+  Interpreter interp(&program_queue, &expression_queue);
 
   std::thread interp_th(interp);
 
@@ -81,30 +81,23 @@ void repl(){
 
     if (running) {
       if (line.front() == '%') {
-        if(line == "%start") {
-          continue;
-        }
+        if(line == "%start") {}
         else if(line == "%stop") {
           program_queue.push(line);
-          continue;
+          running = 0;
         }
         else if (line == "%reset") {
           program_queue.push("%stop");
-          running = 1;
           interp_th.join();
-          interp = Interpreter(&program_queue, &expression_queue, &running);
+          interp = Interpreter(&program_queue, &expression_queue);
           interp_th = std::thread(interp);
-          continue;
         }
         else if(line == "%exit") {
           program_queue.push("%stop");
           interp_th.join();
           return;
         }
-        else {
-          error("invalid interpreter kernel directive");
-          continue;
-        }
+        else error("invalid kernel directive");
       }
       else {
         program_queue.push(line);
@@ -122,29 +115,21 @@ void repl(){
           running = 1;
           interp_th.join();
           interp_th = std::thread(interp);
-          continue;
         }
-        else if(line == "%stop") continue;
+        else if(line == "%stop") {}
         else if (line == "%reset") {
           running = 1;
           interp_th.join();
-          interp = Interpreter(&program_queue, &expression_queue, &running);
+          interp = Interpreter(&program_queue, &expression_queue);
           interp_th = std::thread(interp);
-          continue;
         }
         else if(line == "%exit") {
           interp_th.join();
           return;
         }
-        else {
-          error("invalid interpreter kernel directive");
-          continue;
-        }
+        else error("invalid kernel directive");
       }
-      else {
-        error("interpreter kernel not running");
-        continue;
-      }
+      else error("interpreter kernel not running");
     }
   }
 

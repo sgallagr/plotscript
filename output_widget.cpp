@@ -22,7 +22,7 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
   setLayout(layout);
 
-  interp = Interpreter(&program_queue, &expression_queue, &running);
+  interp = Interpreter(&program_queue, &expression_queue);
 
   interp_th = std::thread(interp);
 
@@ -151,26 +151,21 @@ void OutputWidget::eval(std::string s) {
 
   if (running) {
     if (input.front() == '%') {
-      if(input == "%start") {
-        return;
-      }
+      if(input == "%start") {}
       else if(input == "%stop") {
         program_queue.push(input);
-        return;
+        running = 0;
       }
       else if (input == "%reset") {
         program_queue.push("%stop");
-        running = 1;
         interp_th.join();
-        interp = Interpreter(&program_queue, &expression_queue, &running);
+        interp = Interpreter(&program_queue, &expression_queue);
         interp_th = std::thread(interp);
-        return;
       }
       else {
         scene->clear();
-        scene->addText("Error: invalid interpreter kernel directive");
+        scene->addText("Error: invalid kernel directive");
         view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-        return;
       }
     }
     else {
@@ -186,6 +181,7 @@ void OutputWidget::eval(std::string s) {
       else {
         scene->clear();
         process(exp);
+        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
       }
     }
   }
@@ -195,28 +191,24 @@ void OutputWidget::eval(std::string s) {
         running = 1;
         interp_th.join();
         interp_th = std::thread(interp);
-        return;
       }
-      else if(input == "%stop") return;
+      else if(input == "%stop") {}
       else if (input == "%reset") {
         running = 1;
         interp_th.join();
-        interp = Interpreter(&program_queue, &expression_queue, &running);
+        interp = Interpreter(&program_queue, &expression_queue);
         interp_th = std::thread(interp);
-        return;
       }
       else {
         scene->clear();
-        scene->addText("Error: invalid interpreter kernel directive");
+        scene->addText("Error: invalid kernel directive");
         view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-        return;
       }
     }
     else {
       scene->clear();
       scene->addText("Error: interpreter kernel not running");
       view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-      return;
     }
   }
 }

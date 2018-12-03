@@ -30,8 +30,7 @@ public:
 
   Interpreter();
 
-  Interpreter(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr,
-              int * run_flag);
+  Interpreter(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr);
 
   /*! Parse into an internal Expression from a stream
     \param expression the raw text stream repreenting the candidate expression
@@ -49,14 +48,11 @@ public:
 
   void operator()()
   {
-    while(running){
+    while(1){
       std::string program;
       pq->wait_and_pop(program);
 
-      if (program == "%stop") {
-        *running = 0;
-        return;
-      }
+      if (program == "%stop") return;
 
       std::istringstream expression(program);
 

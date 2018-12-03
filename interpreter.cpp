@@ -29,8 +29,7 @@ Interpreter::Interpreter(){
   }
 }
 
-Interpreter::Interpreter(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr,
-                         int * run_flag){
+Interpreter::Interpreter(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr){
 
   std::ifstream ifs(STARTUP_FILE);
 
@@ -49,7 +48,6 @@ Interpreter::Interpreter(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSa
 
   pq = programQueuePtr;
   expq = expressionQueuePtr;
-  running = run_flag;
 
 }
 
