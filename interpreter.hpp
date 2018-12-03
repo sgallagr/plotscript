@@ -49,7 +49,7 @@ public:
 
   void operator()()
   {
-    while(*running){
+    while(running){
       std::string program;
       pq->wait_and_pop(program);
 
