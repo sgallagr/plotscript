@@ -9,6 +9,7 @@
 #include <QGraphicsScene>
 #include <QPainterPath>
 #include <QMarginsF>
+#include <QPushButton>
 
 class NotebookTest : public QObject {
   Q_OBJECT
@@ -33,6 +34,8 @@ private slots:
   void testSemanticError();
   void testDiscretePlot();
   void testContinuousPlot();
+  void testStopStart();
+  void testReset();
 
 private:
 
@@ -518,6 +521,59 @@ void NotebookTest::testContinuousPlot() {
 
   // check the ordinate axis 
   QCOMPARE(findLines(scene, QRectF(0, -ymax, 0, 20), 0.1), 1);
+}
+
+void NotebookTest::testStopStart() {
+
+  in->clear();
+
+  auto stop_button = notebook.findChild<QPushButton *>(QString("stop"));
+  auto start_button = notebook.findChild<QPushButton *>(QString("start"));
+
+  QTest::keyClicks(in, "(cos pi)");
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  auto itemList = out->scene->items();
+  auto item = dynamic_cast<QGraphicsTextItem *>(itemList.front());
+  QCOMPARE(QString(item->toPlainText()), QString("(-1)"));
+
+  QTest::mouseClick(stop_button, Qt::LeftButton, Qt::NoModifier, QPoint(0, 0), 4);
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  itemList = out->scene->items();
+  item = dynamic_cast<QGraphicsTextItem *>(itemList.front());
+  QCOMPARE(QString(item->toPlainText()), QString("Error: interpreter kernel not running"));
+
+  QTest::mouseClick(start_button, Qt::LeftButton, Qt::NoModifier, QPoint(0, 0), 4);
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  itemList = out->scene->items();
+  item = dynamic_cast<QGraphicsTextItem *>(itemList.front());
+
+  QCOMPARE(QString(item->toPlainText()), QString("(-1)"));
+
+}
+
+void NotebookTest::testReset() {
+
+  in->clear();
+
+  auto reset_button = notebook.findChild<QPushButton *>(QString("reset"));
+
+  QTest::keyClicks(in, "(cos pi)");
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  auto itemList = out->scene->items();
+  auto item = dynamic_cast<QGraphicsTextItem *>(itemList.front());
+  QCOMPARE(QString(item->toPlainText()), QString("(-1)"));
+
+  QTest::mouseClick(reset_button, Qt::LeftButton, Qt::NoModifier, QPoint(0, 0), 4);
+  QTest::keyPress(in, Qt::Key_Return, Qt::ShiftModifier, 4);
+
+  itemList = out->scene->items();
+  item = dynamic_cast<QGraphicsTextItem *>(itemList.front());
+  QCOMPARE(QString(item->toPlainText()), QString("(-1)"));
+
 }
 
 QTEST_MAIN(NotebookTest)
