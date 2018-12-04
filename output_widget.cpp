@@ -151,26 +151,6 @@ void OutputWidget::process(Expression exp) {
 }
 
 void OutputWidget::eval(std::string s) {
-  /*std::istringstream expression(s);
-  
-  scene->clear();
-    
-  if(!interp.parseStream(expression)){
-    scene->addText("Error: Invalid Expression. Could not parse.");
-  }
-  else{
-    try{
-      process(interp.evaluate());
-    }
-    catch(const SemanticError & ex){
-		  scene->addText(ex.what());
-    }
-  }
-
-  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);*/
-  
-  
-  
   std::string input = s;
 
   if (running) {
