@@ -852,10 +852,6 @@ Expression Expression::handle_continuous_plot(Environment & env){
 // this limits the practical depth of our AST
 Expression Expression::eval(Environment & env) {
 
-  Expression interrupt(Atom("Interrupt"));
-
-  //if (global_status_flag > 0) return interrupt;
-
   // lookup only if tail is empty and the head is not list
   if (m_tail.empty() && m_head.asSymbol() != "list") {
     return handle_lookup(m_head, env);
