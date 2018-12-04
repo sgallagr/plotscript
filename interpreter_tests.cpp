@@ -7,6 +7,7 @@
 
 #include "semantic_error.hpp"
 #include "interpreter.hpp"
+#include "threadsafequeue.hpp"
 #include "expression.hpp"
 
 Expression run(const std::string & program){
@@ -34,6 +35,22 @@ TEST_CASE( "Test Interpreter parser with expected input", "[interpreter]" ) {
   std::istringstream iss(program);
  
   Interpreter interp;
+
+  bool ok = interp.parseStream(iss);
+
+  REQUIRE(ok == true);
+}
+
+TEST_CASE( "Test secondary Interpreter constructor using expected input", "[interpreter]" ) {
+
+  std::string program = "(begin (define r 10) (* pi (* r r)))";
+
+  std::istringstream iss(program);
+ 
+  ThreadSafeQueue<std::string> str;
+  ThreadSafeQueue<Expression> exp;
+
+  Interpreter interp(&str, &exp);
 
   bool ok = interp.parseStream(iss);
 

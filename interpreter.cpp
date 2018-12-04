@@ -1,7 +1,6 @@
 #include "interpreter.hpp"
 
 // system includes
-#include <stdexcept>
 #include <fstream>
 
 // module includes
@@ -15,44 +14,19 @@ Interpreter::Interpreter(){
 
   std::ifstream ifs(STARTUP_FILE);
 
-  if(!ifs) error("Could not open startup file for reading.");
-
-  else if(!parseStream(ifs)) error("Invalid startup program. Could not parse.");
-
-  else{
-    try{
-      evaluate();
-    }
-    catch(const SemanticError & ex){
-      error("Startup program failed during evaluation");
-    }	
-  }
+  parseStream(ifs);
+  evaluate();
 }
 
 Interpreter::Interpreter(ThreadSafeQueue<std::string> *programQueuePtr, ThreadSafeQueue<Expression> *expressionQueuePtr){
 
   std::ifstream ifs(STARTUP_FILE);
 
-  if(!ifs) error("Could not open startup file for reading.");
-
-  else if(!parseStream(ifs)) error("Invalid startup program. Could not parse.");
-
-  else{
-    try{
-      evaluate();
-    }
-    catch(const SemanticError & ex){
-      error("Startup program failed during evaluation");
-    }	
-  }  
+  parseStream(ifs);
+  evaluate();
 
   pq = programQueuePtr;
   expq = expressionQueuePtr;
-
-}
-
-void Interpreter::error(const std::string & err_str){
-  std::cerr << "Error: " << err_str << std::endl;
 }
 
 bool Interpreter::parseStream(std::istream & expression) noexcept{
