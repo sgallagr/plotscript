@@ -7,7 +7,6 @@
 #include <QGridLayout>
 
 #include "semantic_error.hpp"
-#include "startup_config.hpp"
 
 OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
@@ -24,7 +23,7 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
   interp = Interpreter(&program_queue, &expression_queue);
 
-  //interp_th = std::thread(interp);
+  interp_th = std::thread(interp);
 
 }
 
@@ -147,7 +146,7 @@ void OutputWidget::process(Expression exp) {
 }
 
 void OutputWidget::eval(std::string s) {
-  std::istringstream expression(s);
+  /*std::istringstream expression(s);
   
   scene->clear();
     
@@ -163,11 +162,11 @@ void OutputWidget::eval(std::string s) {
     }
   }
 
-  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+  view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);*/
   
   
   
-  /*std::string input = s;
+  std::string input = s;
 
   if (running) {
     if (input.front() == '%') {
@@ -226,7 +225,7 @@ void OutputWidget::eval(std::string s) {
       scene->addText("Error: interpreter kernel not running");
       view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
     }
-  }*/
+  }
 }
 
 void OutputWidget::start_kernel() {

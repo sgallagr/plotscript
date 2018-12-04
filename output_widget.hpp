@@ -43,7 +43,7 @@ private:
   int running = 1;
 
   Interpreter interp;
-  //std::thread interp_th;
+  std::thread interp_th;
 
 };
 
