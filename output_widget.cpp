@@ -23,8 +23,13 @@ OutputWidget::OutputWidget(QWidget * parent) : QWidget(parent) {
 
   interp = Interpreter(&program_queue, &expression_queue);
 
-  interp_th = std::thread(std::ref(interp));
+  interp_th = std::thread(interp);
 
+}
+
+OutputWidget::~OutputWidget() {
+  program_queue.push("%stop");
+  interp_th.join();
 }
 
 void OutputWidget::resizeEvent(QResizeEvent * event) {

@@ -17,6 +17,8 @@ public:
 
   OutputWidget(QWidget * parent = nullptr);
 
+  ~OutputWidget();
+
   void resizeEvent(QResizeEvent * event);
 
   void process(Expression exp);
