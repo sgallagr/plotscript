@@ -118,7 +118,8 @@ The C++ code implementing the plotscript interpreter is divided into the followi
 * Tokenize Module (``token.hpp``, ``token.cpp``): This module defines the C++ types and code for lexing (tokenizing).
 * Parsing Module (``parse.hpp``, ``parse.cpp``): This defines the parse function.
 * Environment Module (``environment.hpp``, ``environment.cpp``): This module defines the C++ types and code that implements the plotscript environment mapping.
-* Interpreter Module (``interpreter.hpp``, ``interpreter.cpp``):  This module implements a class named "Interpreter`` for parsing and evaluation of the AST representation of the expression.
+* Interpreter Module (``interpreter.hpp``, ``interpreter.cpp``):  This module implements a class named 
+``Interpreter`` for parsing and evaluation of the AST representation of the expression.
 	
 Driver Program Specification
 -----------------------------------
